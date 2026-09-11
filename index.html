@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#070c16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="AstroAlert Pro - Effemeridi, meteo astronomico e puntamento AR per Celestron 8SE">
+<title>AstroAlert Pro - C8 SE</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3281/3281329.png">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3281/3281329.png">
+
+<style>
+  /* ... TUTTO IL CSS PRECEDENTE RIMANE INVARIATO ... */
+  :root{--bg:#070c16;--panel:#0f1828;--panel-2:#0a111d;--line:#1c2d46;--text:#e7edf6;--muted:#8ca0ba;--muted-2:#586982;--amber:#f2b84b;--cyan:#51a0d5;--green:#2ecc71;--red:#e74c3c;--mono:ui-monospace,"SF Mono",RobotoMono,Consolas,monospace;--sans:Roboto,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{overscroll-behavior-y:contain}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.45;padding:calc(10px + env(safe-area-inset-top)) 12px calc(45px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;-webkit-font-smoothing:antialiased;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  body.modal-open{overflow:hidden}
+  header{border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .loc-bar{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .loc-title{font-size:21px;font-weight:700;color:var(--amber);letter-spacing:-0.02em}
+  .setup-specs{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
+  .btn-ui{background:var(--panel-2);border:1px solid var(--line);color:var(--cyan);font-size:12px;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:var(--mono);min-height:40px;display:inline-flex;align-items:center;justify-content:center}
+  .btn-ui:active{background:var(--line);transform:scale(0.97)}
+  .loc-search-box{display:flex;gap:8px;margin:10px 0 6px}
+  .loc-search-box input{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:6px;font-size:16px;font-family:var(--sans);outline:none;user-select:text;-webkit-user-select:text}
+  .loc-search-box input:focus{border-color:var(--cyan)}
+  .loc-search-box button{background:var(--panel);border:1px solid var(--cyan);color:var(--cyan);padding:10px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:var(--mono);min-height:44px}
+  .loc-search-box button:active{transform:scale(0.97)}
+  .loc-results{margin-bottom:10px}
+  .loc-item{padding:10px 12px;border:1px solid var(--line);background:var(--panel-2);border-radius:6px;margin-top:5px;font-size:13px;cursor:pointer}
+  .loc-item:active{background:var(--line)}
+  .loc-item span{color:var(--muted-2);font-size:11.5px}
+  .navrow{display:flex;gap:8px;margin-bottom:12px}
+  .navrow button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:10px 6px;border-radius:6px;font-size:12.5px;cursor:pointer;min-height:44px}
+  .navrow button:active{transform:scale(0.97)}
+  .navrow button.primary{border-color:var(--amber);color:var(--amber);font-weight:600}
+  .point-card{border:1px solid var(--cyan);background:linear-gradient(160deg,rgba(81,160,213,0.15),var(--panel));border-radius:8px;padding:14px;margin-bottom:12px}
+  .point-card .point-label{font-family:var(--mono);font-size:10.5px;color:var(--cyan);font-weight:700;letter-spacing:0.05em}
+  .point-card .point-name{font-size:22px;font-weight:700;margin:4px 0}
+  .point-card .point-main{font-size:14.5px;line-height:1.5}
+  .point-card .point-meta{font-size:12px;color:var(--muted);margin-top:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+  .card-head{font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:12.5px}
+  .row-full{grid-column:span 2}
+  .label{color:var(--muted);display:block;font-size:11px}
+  .val{font-family:var(--mono);font-weight:600;color:var(--text)}
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-family:var(--mono);border:1px solid;vertical-align:middle;white-space:nowrap}
+  .tag.good{color:var(--green);border-color:var(--green);background:rgba(46,204,113,0.12)}
+  .tag.low{color:var(--amber);border-color:var(--amber);background:rgba(242,184,75,0.12)}
+  .tag.no{color:var(--red);border-color:var(--red);background:rgba(231,76,60,0.12)}
+  .pmag{font-family:var(--mono);font-size:12.5px;color:var(--muted);transition:color 0.3s,text-shadow 0.3s,font-size 0.3s;white-space:nowrap;display:inline-block}
+  .pmag .mag-label{letter-spacing:0.03em}
+  .pmag .mag-value{margin-left:2px}
+  .pmag.mag-super{color:#fff8d0}
+  .pmag.mag-super .mag-label,.pmag.mag-super .mag-value{font-weight:900;text-shadow:0 0 10px rgba(255,248,208,1),0 0 22px rgba(255,220,120,0.75)}
+  .pmag.mag-super .mag-value{font-size:15.5px}
+  .pmag.mag-bright{color:#ffe08a}
+  .pmag.mag-bright .mag-label,.pmag.mag-bright .mag-value{font-weight:800;text-shadow:0 0 8px rgba(255,224,138,0.9),0 0 16px rgba(255,224,138,0.5)}
+  .pmag.mag-bright .mag-value{font-size:14px}
+  .pmag.mag-mid{color:#f5c261}
+  .pmag.mag-mid .mag-value{font-weight:700;text-shadow:0 0 6px rgba(245,194,97,0.6)}
+  .pmag.mag-low{color:#d9a84a}
+  .pmag.mag-low .mag-value{font-weight:600;text-shadow:0 0 4px rgba(217,168,74,0.45)}
+  .pmag.mag-dim{color:#ba9448}
+  .pmag.mag-dim .mag-value{font-weight:500;text-shadow:0 0 3px rgba(186,148,72,0.4)}
+  .pmag.mag-faint{color:#9c8248}
+  .pmag.mag-faint .mag-value{font-weight:500;text-shadow:0 0 3px rgba(156,130,72,0.35);opacity:1}
+  .moon-header{display:flex;align-items:center;gap:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:8px 0 10px;cursor:pointer;transition:background 0.2s}
+  .moon-header:active{background:var(--line)}
+  .moon-header svg{flex-shrink:0}
+  .moon-header-right{flex:1;min-width:0}
+  .moon-title{font-size:15px;font-weight:700;color:var(--text)}
+  .moon-sub{font-size:11.5px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+  .planet-box{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:14px;margin-bottom:10px;cursor:pointer;transition:opacity 0.2s,background 0.2s}
+  .planet-box.dim{opacity:0.65}
+  .planet-box:active{background:var(--panel-2)}
+  .prow1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:8px}
+  .pname{font-size:16.5px;font-weight:700;color:var(--text)}
+  .pname .cost{font-size:12px;color:var(--muted);font-weight:400}
+  .nowpos{font-family:var(--mono);font-size:12px;color:var(--amber);margin:2px 0 8px}
+  .nowpos.dimtxt{color:var(--muted-2)}
+  .ptrack{margin:10px 0 8px;width:100%;overflow:hidden}
+  .ptrack svg{display:block;width:100%;height:94px;shape-rendering:geometricPrecision}
+  .prow2{display:grid;grid-template-columns:1fr 1fr 1fr;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:5px;border-top:1px solid rgba(28,45,70,0.6);padding-top:4px}
+  .prow2 span:nth-child(1){text-align:left}
+  .prow2 span:nth-child(2){text-align:center}
+  .prow2 span:nth-child(3){text-align:right}
+  .verdict{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);line-height:1.5}
+  .verdict b{color:var(--text)}
+  .eyepiece-advice{color:var(--cyan);font-size:12px;margin-top:3px;display:block}
+  .compact-metric{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:3px 0;display:block}
+  .compact-metric b{color:var(--text)}
+  .beginner-guide{font-size:12px;color:var(--text);background:var(--panel-2);border-left:3px solid var(--amber);padding:8px 10px;margin-top:6px;border-radius:0 4px 4px 0;line-height:1.45}
+  .beginner-guide b{color:var(--amber)}
+  .section-note{font-size:11.5px;color:var(--muted);margin:-2px 0 9px;line-height:1.45}
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+  .toolbar button{flex:1 1 20%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--mono);min-height:40px}
+  .toolbar button:active{transform:scale(0.97)}
+  .toolbar button.active{border-color:var(--amber);color:var(--amber);font-weight:600}
+  .target-card{border:1px solid var(--line);background:var(--panel-2);border-radius:6px;padding:10px 12px;margin-bottom:8px}
+  .target-card.hidden-target{display:none}
+  .target-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:nowrap}
+  .target-name{font-size:14.5px;font-weight:700;color:var(--text);line-height:1.25;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  .target-score{font-size:10px;color:var(--amber);font-family:var(--mono);font-weight:600;white-space:nowrap;border:1px solid rgba(242,184,75,0.4);background:rgba(242,184,75,0.08);padding:1px 6px;border-radius:3px;flex-shrink:0}
+  .target-info{font-size:12px;line-height:1.5;color:var(--text);display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+  .target-info .tag{margin-left:0;flex-shrink:0}
+  .target-info > span{display:inline}
+  .target-info b{color:var(--text)}
+  .target-info .pmag{flex-shrink:0}
+  .target-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .target-meta b{color:var(--text)}
+  .target-c8{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .source-pill{display:inline-block;font-size:9.5px;border:1px solid var(--line);padding:2px 5px;border-radius:3px;color:var(--muted-2);margin-top:6px}
+  .moon-warn{display:block;font-size:11.5px;color:var(--amber);border-left:3px solid var(--amber);padding:4px 8px;margin-top:6px;background:rgba(242,184,75,0.08);border-radius:0 4px 4px 0}
+  .astrolinks{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .astrolinks a,.btn-ar-inline{font-family:var(--mono);font-size:11px;color:var(--cyan);text-decoration:none;border:1px solid var(--line);background:var(--panel-2);padding:6px 10px;border-radius:5px;min-height:34px;display:inline-flex;align-items:center;cursor:pointer}
+  .astrolinks a:active,.btn-ar-inline:active{border-color:var(--cyan);background:var(--line)}
+  table.eyepiece-table{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--mono);margin:6px 0}
+  table.eyepiece-table th{text-align:left;color:var(--muted);border-bottom:1px solid var(--line);padding:6px 2px}
+  table.eyepiece-table td{padding:6px 2px;border-bottom:1px solid rgba(29,46,71,0.5)}
+  table.eyepiece-table tr.ep-row.warn-row td{background:rgba(242,184,75,0.06)}
+  .ep-badge{display:inline-block;font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;margin-left:5px;color:var(--amber);border:1px solid var(--amber);background:rgba(242,184,75,0.12);vertical-align:middle;white-space:nowrap}
+  details.collapse{border:1px solid var(--line);background:var(--panel);border-radius:6px;margin-bottom:10px;overflow:hidden}
+  details.collapse summary{font-size:12.5px;font-weight:700;color:var(--amber);padding:12px 14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+  details.collapse summary::-webkit-details-marker{display:none}
+  details.collapse summary::after{content:"+";color:var(--muted);font-size:15px;font-family:var(--mono)}
+  details.collapse[open] summary::after{content:"−"}
+  details.collapse > div{padding:10px 14px;border-top:1px solid var(--line)}
+  .note{font-size:11.5px;color:var(--muted);background:var(--panel-2);border-left:3px solid var(--cyan);padding:9px 12px;margin-top:8px;border-radius:0 4px 4px 0}
+  .note b{color:var(--text)}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(4,8,14,0.85);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+  .modal-sheet{width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;padding:18px 18px 30px}
+  .modal-sheet .mtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .modal-sheet h3{font-size:22px;font-weight:700;color:var(--text)}
+  .modal-sheet .mclose{background:var(--panel);border:1px solid var(--line);color:var(--muted);width:34px;height:34px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer}
+  .modal-sheet .mfacts{font-size:13px;color:var(--muted);line-height:1.55;margin:8px 0 14px}
+  .compasswrap{display:flex;justify-content:center;margin:8px 0 12px}
+  .modal-sheet .mstats{font-size:12.5px;margin-top:10px}
+  .datarow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;gap:8px}
+  .datarow span{color:var(--muted)}
+  .datarow b{font-family:var(--mono);color:var(--text)}
+  .arbtn{width:100%;background:linear-gradient(160deg,rgba(242,184,75,0.16),var(--panel-2));border:1px solid var(--amber);color:var(--amber);padding:12px;border-radius:6px;font-size:14px;font-weight:700;margin-top:14px;cursor:pointer;min-height:48px;font-family:var(--mono)}
+  .arbtn:active{transform:scale(0.98)}
+  .moon-phase-img{display:block;width:170px;height:170px;margin:4px auto 8px;border-radius:50%;border:2px solid var(--line);background:#000;object-fit:cover}
+  .moon-phase-caption{text-align:center;font-size:11px;color:var(--muted);margin-bottom:12px;font-family:var(--mono)}
+  .arview{position:fixed;inset:0;z-index:60;background:#000}
+  .arview video{width:100%;height:100%;object-fit:cover}
+  .arview .arclose{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.4);color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;z-index:2;cursor:pointer}
+  .arview .armsg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;font-size:14px;padding:0 28px;line-height:1.6;background:rgba(0,0,0,0.5);border-radius:8px}
+  .arview .arreticle{position:absolute;width:68px;height:68px;border:2px solid var(--amber);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(242,184,75,0.6);transition:left 0.1s linear,top 0.1s linear}
+  .arview .arlabel{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);font-size:14px;text-shadow:0 2px 4px rgba(0,0,0,0.9);font-weight:700}
+  footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted-2);font-family:var(--mono);line-height:1.6}
+
+  /* ==== NUOVI STILI PER ONBOARDING E INDICATORI ==== */
+  .perm-backdrop{position:fixed;inset:0;background:linear-gradient(180deg,#070c16 0%,#0a111d 100%);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px}
+  .perm-card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 20px;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+  .perm-card h2{font-size:20px;font-weight:700;color:var(--amber);margin-bottom:6px;letter-spacing:-0.01em}
+  .perm-card .sub{font-size:12.5px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+  .perm-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+  .perm-row .ico{font-size:22px;line-height:1;flex-shrink:0}
+  .perm-row .txt{flex:1;min-width:0}
+  .perm-row .ttl{font-size:13.5px;font-weight:600;color:var(--text)}
+  .perm-row .desc{font-size:11px;color:var(--muted);margin-top:2px}
+  .perm-row .st{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;border:1px solid var(--line);color:var(--muted-2);flex-shrink:0}
+  .perm-row .st.ok{color:var(--green);border-color:var(--green);background:rgba(46,204,113,0.12)}
+  .perm-row .st.no{color:var(--red);border-color:var(--red);background:rgba(231,76,60,0.12)}
+  .perm-row .st.wait{color:var(--amber);border-color:var(--amber);background:rgba(242,184,75,0.12)}
+  .perm-btn{width:100%;background:linear-gradient(160deg,rgba(242,184,75,0.2),rgba(242,184,75,0.08));border:1px solid var(--amber);color:var(--amber);padding:14px;border-radius:8px;font-size:15px;font-weight:700;margin-top:16px;cursor:pointer;font-family:var(--mono);min-height:52px;letter-spacing:0.02em}
+  .perm-btn:active{transform:scale(0.98);background:rgba(242,184,75,0.25)}
+  .perm-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .perm-skip{width:100%;background:transparent;border:none;color:var(--muted);font-size:12px;padding:12px;margin-top:6px;cursor:pointer;font-family:var(--mono);text-decoration:underline}
+  .online-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px;vertical-align:middle;box-shadow:0 0 6px currentColor}
+  .online-dot.off{background:var(--red)}
+  .install-banner{position:fixed;bottom:14px;left:14px;right:14px;max-width:492px;margin:0 auto;background:linear-gradient(160deg,rgba(81,160,213,0.15),var(--panel));border:1px solid var(--cyan);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:40;box-shadow:0 8px 32px rgba(0,0,0,0.5);animation:slideUp 0.35s ease-out}
+  @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .install-banner .ib-txt{flex:1;font-size:12.5px;color:var(--text);line-height:1.4}
+  .install-banner .ib-txt b{color:var(--cyan)}
+  .install-banner button{background:var(--cyan);border:none;color:#04121e;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:var(--mono);white-space:nowrap}
+  .install-banner .ib-close{background:transparent;color:var(--muted);border:none;font-size:18px;padding:4px 8px;cursor:pointer}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--amber);color:var(--text);padding:10px 16px;border-radius:8px;font-size:12.5px;font-family:var(--mono);z-index:90;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-width:90vw;text-align:center;animation:slideUp 0.3s ease-out}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+</head>
+<body>
+
+<!-- OVERLAY ONBOARDING PERMESSI (appare solo al primo avvio) -->
+<div class="perm-backdrop" id="permOverlay" style="display:none">
+  <div class="perm-card">
+    <h2>Benvenuto in AstroAlert</h2>
+    <div class="sub">Per funzionare al meglio, l'app ha bisogno di alcuni permessi. Sono tutti facoltativi tranne la posizione, che puoi anche impostare manualmente.</div>
+
+    <div class="perm-row" id="permRowGeo">
+      <div class="ico">📍</div>
+      <div class="txt">
+        <div class="ttl">Posizione</div>
+        <div class="desc">Per calcolare effemeridi e meteo sulla tua località</div>
+      </div>
+      <div class="st wait" id="permStGeo">In attesa</div>
+    </div>
+
+    <div class="perm-row" id="permRowNotif">
+      <div class="ico">🔔</div>
+      <div class="txt">
+        <div class="ttl">Notifiche</div>
+        <div class="desc">Avvisi su seeing ottimo e inizio buio astronomico</div>
+      </div>
+      <div class="st wait" id="permStNotif">In attesa</div>
+    </div>
+
+    <div class="perm-row" id="permRowCam">
+      <div class="ico">📷</div>
+      <div class="txt">
+        <div class="ttl">Fotocamera</div>
+        <div class="desc">Per il puntamento AR dei pianeti in tempo reale</div>
+      </div>
+      <div class="st wait" id="permStCam">In attesa</div>
+    </div>
+
+    <button class="perm-btn" id="permGrant">Concedi tutti i permessi</button>
+    <button class="perm-skip" id="permSkip">Salta — configurerò dopo</button>
+  </div>
+</div>
+
+<!-- resto del body rimane IDENTICO a prima -->
+<header>
+  <div class="loc-bar">
+    <span id="locLabel"><span class="online-dot" id="onlineDot"></span>40.6947° N, 14.4803° E · Castellammare di Stabia</span>
+    <button class="btn-ui" id="btnGps">Usa GPS</button>
+  </div>
+  <div class="loc-search-box">
+    <input type="text" id="locInput" placeholder="Cerca comune (es. Castellammare, Napoli, Moiano)...">
+    <button id="btnSearchCity">Cerca</button>
+  </div>
+  <div class="loc-results" id="locResults"></div>
+  <div class="loc-title" id="dateTitle">Calcolo effemeridi...</div>
+  <div class="setup-specs">
+    Celestron NexStar 8SE (D: 203mm f/10, Focale 2032mm)<br>
+    Treno ottico: Oculari 25mm (81x), 15mm (135x), Barlow 2x (162x / 271x)
+  </div>
+</header>
+
+<div class="navrow">
+  <button id="btnPrev">&larr; Notte prec.</button>
+  <button id="btnToday" class="primary">Stanotte</button>
+  <button id="btnNext">Notte succ. &rarr;</button>
+</div>
+
+<div id="pointingTarget"></div>
+
+<div class="card">
+  <div class="card-head">METEO &amp; SEEING AVANZATO</div>
+  <div class="grid">
+    <div><span class="label">Nuvole ORA (Live):</span><span class="val" id="mCloudsLive">--%</span></div>
+    <div><span class="label">Media Notte Nuvole:</span><span class="val" id="mCloudsAvg">--%</span></div>
+    <div><span class="label">Temp ORA | Umidità:</span><span class="val" id="mTemp">--°C | --%</span></div>
+    <div><span class="label">Punto di Rugiada ORA:</span><span class="val" id="mDew">--°C</span></div>
+    <div><span class="label">Vento a terra (10 m):</span><span class="val" id="mWind10">-- km/h</span></div>
+    <div><span class="label">Vento 1.500 m (850 hPa):</span><span class="val" id="mWind850">-- km/h</span></div>
+    <div><span class="label">Vento Quota (250 hPa Jet):</span><span class="val" id="mJet">-- km/h</span></div>
+    <div><span class="label">Indice Kp Solare:</span><span class="val" id="mKp">--</span></div>
+    <div class="row-full"><span class="label">Rischio Condensa Lastra:</span><span id="mCond">--</span></div>
+    <div class="row-full"><span class="label">Stima Seeing &amp; Risoluzione:</span><span id="mSeeing">--</span></div>
+  </div>
+  <div class="note">
+    <b>Gestione Lastra C8:</b> Se il differenziale (Temp - Rugiada) scende sotto 3°C, monta subito il paraluce per prevenire la condensa sulla lastra Schmidt.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">BUIO ASTRONOMICO &amp; LUNA</div>
+  <div class="grid">
+    <div><span class="label">Tramonto &rarr; Alba Sole:</span><span class="val" id="sunCycle">-- : --</span></div>
+    <div><span class="label">Buio pieno (Sole &lt; -18°):</span><span class="val" id="astroDark">-- : --</span></div>
+  </div>
+  <div class="moon-header" id="moonHeaderBox">
+    <div id="moonSvgWrap"></div>
+    <div class="moon-header-right">
+      <div class="moon-title" id="moonNameTxt">Caricamento Luna...</div>
+      <div class="moon-sub" id="moonSubTxt">--</div>
+    </div>
+    <div class="pmag" id="moonMagBox">Mag --</div>
+  </div>
+  <div class="compact-metric" id="moonPhysicsLine">--</div>
+  <div class="nowpos" id="moonNowPos">Posizione corrente in calcolo...</div>
+  <div class="ptrack" id="moonTrack"></div>
+  <div class="prow2" id="moonTimesRow">
+    <span>sorge --:--</span><span>max --° alle --:--</span><span>tramonta --:--</span>
+  </div>
+  <div class="compact-metric" id="moonTransitLine" style="margin-top:6px;"></div>
+  <div class="verdict" style="margin-top: 10px;">
+    <b>Consiglio C8 SE per la Luna:</b>
+    <span class="eyepiece-advice" id="moonEyepieceTxt">--</span>
+    <div class="beginner-guide">
+      <b>Guida per principianti:</b> Osserva lungo il <i>terminatore</i> (la linea di confine tra luce e ombra). È lì che la luce radente del Sole crea ombre lunghe e fa risaltare con forte contrasto le pareti dei crateri, le catene montuose (come gli Appennini lunari) e le rime vallive.
+    </div>
+  </div>
+  <div class="astrolinks">
+    <a href="https://scoprilaluna.inaf.it/" target="_blank" rel="noopener">Atlante Lunare INAF ↗</a>
+    <a href="https://edu.inaf.it/astronave-pegaso/la-luna/" target="_blank" rel="noopener">Guida Luna EduINAF ↗</a>
+    <button class="btn-ar-inline" id="btnMoonAR">Inquadra Luna con fotocamera</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">PIANETI NEL CORSO DELLA NOTTE</div>
+  <div class="section-note">Ogni curva mostra <b>24 ore esatte</b>. Ordinati per <b>visibilità ORA</b> e poi per <b>magnitudine</b> (i più brillanti in alto).</div>
+  <div id="planetCards">Calcolo posizioni orbitali in corso...</div>
+</div>
+
+<div class="card">
+  <div class="card-head">BERSAGLI CONSIGLIATI STANOTTE</div>
+  <div class="section-note">Luna, pianeti, stelle e cielo profondo ordinati per <b>visibilità</b> e poi per <b>magnitudine</b> e altezza.</div>
+  <div class="toolbar" id="filterToolbar">
+    <button class="active" data-filter="all">Tutti</button>
+    <button data-filter="planet">Pianeti</button>
+    <button data-filter="star">Stelle</button>
+    <button data-filter="deep">Deep sky</button>
+  </div>
+  <div id="nightTargets">Calcolo bersagli...</div>
+</div>
+
+<details class="collapse">
+  <summary>CALCOLO OCULARI CELESTRON 8SE</summary>
+  <div>
+    <table class="eyepiece-table">
+      <thead><tr><th>Configurazione</th><th>Ingr.</th><th>Pupilla</th><th>Utilizzo C8SE</th></tr></thead>
+      <tbody>
+        <tr class="ep-row" data-min-quality="0"><td>Oculare 25mm</td><td>81x</td><td>2.50 mm</td><td>Ricerca, allineamento GoTo, ammassi aperti</td></tr>
+        <tr class="ep-row" data-min-quality="1"><td>Oculare 15mm</td><td>135x</td><td>1.50 mm</td><td>Ingrandimento ideale col seeing medio locale</td></tr>
+        <tr class="ep-row" data-min-quality="1"><td>25mm + Barlow 2x</td><td>162x</td><td>1.25 mm</td><td>Pianeti stabili con ottima estrazione pupillare</td></tr>
+        <tr class="ep-row" data-min-quality="2"><td>15mm + Barlow 2x</td><td>271x</td><td>0.74 mm</td><td>Dettagli fini (Cassini, Marte) solo con seeing eccellente</td></tr>
+      </tbody>
+    </table>
+    <div class="note" id="eyepieceLiveNote">
+      <b>Adattamento live:</b> le righe con badge <b>SCONSIGLIATO</b> sono poco indicate col seeing attuale.
+    </div>
+    <div class="note">Potere risolutivo ottico (Dawes): <b>0.57"</b>. Oltre i 271x la turbolenza del litorale degrada l'immagine quasi ogni sera.</div>
+  </div>
+</details>
+
+<details class="collapse">
+  <summary>LEGENDA ASTRONOMICA: COS'È LA MAGNITUDINE (MAG)?</summary>
+  <div>
+    <div style="font-size:12.5px; color:var(--text); line-height:1.6;">
+      La <b>Magnitudine apparente (Mag)</b> misura la luminosità di un corpo celeste visto dalla Terra.<br>
+      • <b>Scala inversa</b>: più il numero è basso o negativo, più l'oggetto è brillante (es. Sole: -26.7, Luna piena: -12.7, Venere: -4.4, Sirio: -1.4).<br>
+      • <b>Scala logaritmica</b>: un salto di 5 magnitudini corrisponde a 100 volte di luminosità.<br>
+      • <b>Visibilità a occhio nudo</b>: fino a circa mag 6.0 sotto cielo di montagna; mag 3.5-4.5 in città.<br>
+      • <b>Portata Celestron 8SE (203 mm)</b>: fino a mag 14 in cielo buio; mag 11.5-12.0 da suburbano.<br>
+      • <b>Termometro brillantezza:</b> la scritta <b>Mag</b> si illumina in base al valore.
+    </div>
+  </div>
+</details>
+
+<details class="collapse">
+  <summary>SCIAMI METEORICI &amp; COMETE</summary>
+  <div>
+    <div class="label">Sciami attivi (Calendario IMO):</div>
+    <div class="val" id="showersText" style="margin-bottom: 8px;">Controllo calendario...</div>
+    <div class="astrolinks">
+      <a href="https://theskylive.com/comets" target="_blank" rel="noopener">TheSkyLive Comete ↗</a>
+      <a href="https://cobs.si" target="_blank" rel="noopener">Database COBS ↗</a>
+    </div>
+  </div>
+</details>
+
+<div id="modalRoot"></div>
+
+<footer>
+  Effemeridi: Astronomy Engine (VSOP87). Dati meteo ECMWF/GFS via Open-Meteo. Link scientifici: INAF / EduINAF.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var A = Astronomy;
+  var loc = { lat: 40.6947, lon: 14.4803, elev: 6, name: "Castellammare di Stabia" };
+  var activeDate = new Date();
+  var currentWeatherContext = { clouds: 0, jetSpeed: 50, jetAvailable: false, seeingQuality: 1 };
+  var KM_PER_LY = 9.460730472e12;
+  var wakeLock = null;
+  var installPromptEvent = null;
+
+  var COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
+  function compassDir(az){var i=Math.round(az/22.5)%16;if(i<0)i+=16;return COMPASS[i];}
+  function fmtTime(d){if(!d)return"--:--";return new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(d);}
+  function hoursBetween(a,b){return (b.getTime()-a.getTime())/3600000;}
+  function addHours(d,h){return new Date(d.getTime()+h*3600000);}
+
+  function toast(msg, ms) {
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function(){ el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; }, (ms||3000)-300);
+    setTimeout(function(){ el.remove(); }, (ms||3000));
+  }
+
+  function magBrightnessClass(mag) {
+    if (mag <= -2)   return "mag-super";
+    if (mag <= 0)    return "mag-bright";
+    if (mag <= 2)    return "mag-mid";
+    if (mag <= 4.5)  return "mag-low";
+    if (mag <= 6)    return "mag-dim";
+    return "mag-faint";
+  }
+  function magHTML(mag) {
+    return '<span class="mag-label">Mag</span> <span class="mag-value">' + Number(mag).toFixed(1) + '</span>';
+  }
+  function magSpan(mag) {
+    return '<span class="pmag ' + magBrightnessClass(mag) + '">' + magHTML(mag) + '</span>';
+  }
+
+  function formatCompactDistance(km,isFarDeepSky,fixedLy){
+    if(isFarDeepSky||fixedLy>0.05){
+      var lyVal=fixedLy||(km/KM_PER_LY);
+      if(lyVal>=1000)return Math.round(lyVal).toLocaleString('it-IT')+" A/Luce";
+      return lyVal.toFixed(1)+" A/Luce";
+    }
+    var kmStr="";
+    if(km<1e6)kmStr=Math.round(km).toLocaleString('it-IT')+" km";
+    else if(km<1e9)kmStr=(km/1e6).toFixed(1)+" Mil. km";
+    else{var mldVal=km/1e9;kmStr=(Math.abs(mldVal-1.0)<0.05)?"1 MILIARDO km":mldVal.toFixed(2)+" MILIARDI km";}
+    var minLight=(km/299792.458)/60;
+    var lightStr=minLight<1?(minLight*60).toFixed(1)+" Sec/Luce":minLight.toFixed(1)+" Min/Luce";
+    return kmStr+" ("+lightStr+")";
+  }
+
+  /* ... PLANET_DATA, STAR_CATALOG, MESSIER, SHOWERS, e tutte le funzioni di calcolo 
+     (getNightWindow, getBodyCycle, sparkSVG, magCategory, altCategory, 
+      getDynamicEyepieceAdvice, bestFixed, findTransitTime, compareTargets, 
+      renderNightTargets, compassSVG, moonPhaseSVG, moonPhaseImageUrl,
+      closeModal, openCelestialModal, startAR, stopAR, updateEyepieceAdvice, 
+      updateAstro, geocodeCity, acquireGps) RIMANGONO IDENTICHE alla versione precedente. 
+     Le riporto sotto per completezza. */
+
+  var PLANET_DATA = {
+    Mercury:{name:"Mercurio",radius:2440.5,url:"https://edu.inaf.it/rubriche/schede-pianeti/mercurio/",massRatio:"0,055 volte la Terra (1/18)",facts:"Il pianeta più piccolo del sistema solare interno.",guide:"Non aspettarti colori o dettagli: nel telescopio apparirà come una piccolissima 'mezzaluna' o disco giallino che ribolle vistosamente a causa del forte spessore di atmosfera terrestre."},
+    Venus:{name:"Venere",radius:6051.8,url:"https://edu.inaf.it/rubriche/schede-pianeti/venere/",massRatio:"0,815 volte la Terra (quasi gemello)",facts:"Pianeta più caldo del sistema solare per via dell'effetto serra.",guide:"È così splendente che all'oculare del C8 rischia di abbagliare. Ammirane la fase (da sottile falce a gibbosa), meglio se al crepuscolo."},
+    Mars:{name:"Marte",radius:3396.2,url:"https://edu.inaf.it/rubriche/schede-pianeti/marte/",massRatio:"0,107 volte la Terra (circa un decimo)",facts:"Il pianeta rosso. Ospita l'Olympus Mons, il vulcano più alto del sistema solare.",guide:"Bersaglio esigente: il diametro apparente varia molto in base alla distanza dalla Terra. A 162x o 271x mostra la calotta polare bianca e chiazze scure."},
+    Jupiter:{name:"Giove",radius:71492,url:"https://edu.inaf.it/rubriche/schede-pianeti/giove/",massRatio:"318 volte la Terra",facts:"Il pianeta più imponente del sistema solare.",guide:"Il pianeta più gratificante: già a 81x vedi le due strisce equatoriali e i 4 satelliti galileiani. A 162x puoi scorgere la Grande Macchia Rossa."},
+    Saturn:{name:"Saturno",radius:60268,url:"https://edu.inaf.it/rubriche/schede-pianeti/saturno/",massRatio:"95 volte la Terra",facts:"Celebre per il maestoso sistema di anelli composti da ghiaccio d'acqua e polveri.",guide:"L'anello si stacca nettamente dal disco già a 81x. A 135x-162x noti l'ombra del pianeta sugli anelli e la Divisione di Cassini."},
+    Uranus:{name:"Urano",radius:25559,url:"https://edu.inaf.it/rubriche/schede-pianeti/urano/",massRatio:"14,5 volte la Terra",facts:"Gigante di ghiaccio con asse inclinato di ~98°.",guide:"A bassi ingrandimenti sembra una stella: monta l'oculare da 15mm (135x). Noterai un minuscolo dischetto color verde acqua."},
+    Neptune:{name:"Nettuno",radius:24764,url:"https://edu.inaf.it/rubriche/schede-pianeti/nettuno/",massRatio:"17 volte la Terra",facts:"Il pianeta più esterno del sistema solare. Venti fino a 2.000 km/h.",guide:"Data l'enorme distanza, appare piccolissimo. A 135x-162x lo distingui dalle stelle per la tonalità azzurro cobalto e l'assenza di scintillio."}
+  };
+  var MOON_MASS_RATIO = "0,012 volte la Terra (1/81)";
+  var STAR_CATALOG = [
+    { name:'Sirio', ra:6.7525, dec:-16.7161, mag:-1.46, distLy:8.6, massRatio:"686.000 volte la Terra (2,1 M☉)", url:'https://it.wikipedia.org/wiki/Sirio', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Sirius' },
+    { name:'Arturo', ra:14.2610, dec:19.1824, mag:-0.05, distLy:36.7, massRatio:"360.000 volte la Terra (1,1 M☉)", url:'https://it.wikipedia.org/wiki/Arturo_(stella)', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Arcturus' },
+    { name:'Vega', ra:18.6156, dec:38.7837, mag:0.03, distLy:25.0, massRatio:"710.000 volte la Terra (2,1 M☉)", url:'https://it.wikipedia.org/wiki/Vega', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Vega' },
+    { name:'Capella', ra:5.2782, dec:45.9980, mag:0.08, distLy:42.9, massRatio:"850.000 volte la Terra (sistema binario)", url:'https://it.wikipedia.org/wiki/Capella_(astronomia)', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Capella' },
+    { name:'Rigel', ra:5.2423, dec:-8.2016, mag:0.13, distLy:860.0, massRatio:"7.000.000 volte la Terra (21 M☉)", url:'https://it.wikipedia.org/wiki/Rigel', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Rigel' },
+    { name:'Betelgeuse', ra:5.9195, dec:7.4071, mag:0.50, distLy:642.5, massRatio:"5.500.000 volte la Terra (16,5 M☉)", url:'https://it.wikipedia.org/wiki/Betelgeuse', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Betelgeuse' },
+    { name:'Altair', ra:19.8464, dec:8.8683, mag:0.77, distLy:16.7, massRatio:"600.000 volte la Terra (1,8 M☉)", url:'https://it.wikipedia.org/wiki/Altair', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Altair' },
+    { name:'Aldebaran', ra:4.5987, dec:16.5093, mag:0.87, distLy:65.3, massRatio:"386.000 volte la Terra (1,2 M☉)", url:'https://it.wikipedia.org/wiki/Aldebaran', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Aldebaran' },
+    { name:'Antares', ra:16.4901, dec:-26.4320, mag:1.06, distLy:550.0, massRatio:"4.000.000 volte la Terra (12 M☉)", url:'https://it.wikipedia.org/wiki/Antares', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Antares' },
+    { name:'Spica', ra:13.4199, dec:-11.1613, mag:0.97, distLy:250.0, massRatio:"3.500.000 volte la Terra (10,5 M☉)", url:'https://it.wikipedia.org/wiki/Spica', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Spica' }
+  ];
+  var MESSIER = [
+    { name:'M31 Galassia di Andromeda', id:'M31', ra:0.7123, dec:41.2692, mag:3.44, distLy:2540000, massRatio:"500 miliardi di volte la Terra", url:'https://it.wikipedia.org/wiki/Galassia_di_Andromeda' },
+    { name:'M42 Nebulosa di Orione', id:'M42', ra:5.5881, dec:-5.3911, mag:4.00, distLy:1344, massRatio:"6,6 milioni di volte la Terra", url:'https://it.wikipedia.org/wiki/Nebulosa_di_Orione' },
+    { name:'M45 Pleiadi', id:'M45', ra:3.7900, dec:24.1167, mag:1.60, distLy:444, massRatio:"2,6 milioni di volte la Terra", url:'https://it.wikipedia.org/wiki/Pleiadi_(astronomia)' },
+    { name:'M13 Ammasso di Ercole', id:'M13', ra:16.6949, dec:36.4613, mag:5.80, distLy:22200, massRatio:"200 milioni di volte la Terra", url:'https://it.wikipedia.org/wiki/Messier_13' },
+    { name:'M57 Nebulosa Anello', id:'M57', ra:18.8931, dec:33.0292, mag:8.80, distLy:2570, massRatio:"400.000 volte la Terra", url:'https://it.wikipedia.org/wiki/Nebulosa_Anello' },
+    { name:'M27 Nebulosa Manubrio', id:'M27', ra:19.9934, dec:22.7211, mag:7.50, distLy:1360, massRatio:"500.000 volte la Terra", url:'https://it.wikipedia.org/wiki/Nebulosa_Manubrio' },
+    { name:'M81 Galassia di Bode', id:'M81', ra:9.9259, dec:69.0653, mag:6.90, distLy:11800000, massRatio:"230 miliardi di volte la Terra", url:'https://it.wikipedia.org/wiki/Messier_81' },
+    { name:'M82 Galassia Sigaro', id:'M82', ra:9.9313, dec:69.6797, mag:8.40, distLy:11500000, massRatio:"16 miliardi di volte la Terra", url:'https://it.wikipedia.org/wiki/Galassia_Sigaro' }
+  ];
+  var SHOWERS = [
+    { name:"Quadrantidi", s:[0,1], e:[0,10], zhr:110 }, { name:"Liridi", s:[3,16], e:[3,25], zhr:18 },
+    { name:"Eta Aquaridi", s:[3,19], e:[4,28], zhr:50 }, { name:"Delta Aquaridi", s:[6,12], e:[7,23], zhr:25 },
+    { name:"Perseidi", s:[6,17], e:[7,24], zhr:100 }, { name:"Orionidi", s:[9,2], e:[10,7], zhr:20 },
+    { name:"Leonidi", s:[10,6], e:[10,30], zhr:15 }, { name:"Geminidi", s:[11,4], e:[11,17], zhr:150 },
+    { name:"Ursidi", s:[11,17], e:[11,26], zhr:10 }
+  ];
+
+  function getNightWindow(obs, anchorDate) {
+    var base = new Date(anchorDate); base.setHours(12,0,0,0);
+    var sunset = A.SearchRiseSet(A.Body.Sun, obs, -1, base, 1);
+    var sunrise = A.SearchRiseSet(A.Body.Sun, obs, +1, sunset ? sunset.date : base, 1);
+    return { start: sunset ? sunset.date : base, end: sunrise ? sunrise.date : addHours(base, 12) };
+  }
+  function getBodyCycle(body, obs, refTime, limitDays) {
+    var lim = limitDays || 2;
+    var winStart = addHours(refTime, -12), winEnd = addHours(refTime, +12);
+    var riseEvt = A.SearchRiseSet(body, obs, +1, winStart, lim);
+    var setEvt  = A.SearchRiseSet(body, obs, -1, winStart, lim);
+    var rise = riseEvt ? riseEvt.date : null;
+    var set  = setEvt ? setEvt.date : null;
+    var pts = [], samples = 48;
+    var totalH = hoursBetween(winStart, winEnd);
+    var peak = { alt:-90, az:0, t:winStart };
+    for (var i = 0; i <= samples; i++) {
+      var t = addHours(winStart, totalH * i / samples);
+      var eq = A.Equator(body, t, obs, true, true);
+      var hor = A.Horizon(t, obs, eq.ra, eq.dec, 'normal');
+      pts.push({ t:t, alt:hor.altitude, az:hor.azimuth });
+      if (hor.altitude > peak.alt) peak = { alt:hor.altitude, az:hor.azimuth, t:t };
+    }
+    return { rise: rise, set: set, peak: peak, pts: pts, win: { start: winStart, end: winEnd } };
+  }
+  function sparkSVG(pts, now, win, riseDate, peakDate, setDate, isVisibleNow, isToday) {
+    var W=380, H=84, padX=8, padTop=14, padBottom=16;
+    var t0=win.start.getTime(), t1=win.end.getTime();
+    function x(t){ return padX + (W-2*padX)*((t-t0)/(t1-t0)); }
+    var altMin=-20, altMax=90, plotH=H-padTop-padBottom;
+    function y(alt){ return (padTop+plotH) - plotH*((alt-altMin)/(altMax-altMin)); }
+    var horizonY = y(0);
+    var d = pts.map(function(p,i){ return (i===0?"M":"L")+x(p.t.getTime()).toFixed(1)+","+y(p.alt).toFixed(1); }).join(" ");
+    var fillD = d+" L"+x(t1).toFixed(1)+","+(padTop+plotH)+" L"+x(t0).toFixed(1)+","+(padTop+plotH)+" Z";
+    var solidSegs = "", dashSegs = "";
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p1 = pts[i], p2 = pts[i+1];
+      var x1 = x(p1.t.getTime()), x2 = x(p2.t.getTime());
+      if (p1.alt >= 0 && p2.alt >= 0) {
+        solidSegs += '<line x1="'+x1.toFixed(1)+'" y1="'+horizonY.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+horizonY.toFixed(1)+'" stroke="var(--green)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
+      } else if (p1.alt < 0 && p2.alt < 0) {
+        dashSegs += '<line x1="'+x1.toFixed(1)+'" y1="'+horizonY.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+horizonY.toFixed(1)+'" stroke="var(--green)" stroke-width="1.4" stroke-dasharray="4,3" vector-effect="non-scaling-stroke"/>';
+      } else {
+        var frac = (0 - p1.alt) / (p2.alt - p1.alt);
+        var xC = x1 + (x2 - x1) * frac;
+        if (p1.alt >= 0) {
+          solidSegs += '<line x1="'+x1.toFixed(1)+'" y1="'+horizonY.toFixed(1)+'" x2="'+xC.toFixed(1)+'" y2="'+horizonY.toFixed(1)+'" stroke="var(--green)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
+          dashSegs += '<line x1="'+xC.toFixed(1)+'" y1="'+horizonY.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+horizonY.toFixed(1)+'" stroke="var(--green)" stroke-width="1.4" stroke-dasharray="4,3" vector-effect="non-scaling-stroke"/>';
+        } else {
+          dashSegs += '<line x1="'+x1.toFixed(1)+'" y1="'+horizonY.toFixed(1)+'" x2="'+xC.toFixed(1)+'" y2="'+horizonY.toFixed(1)+'" stroke="var(--green)" stroke-width="1.4" stroke-dasharray="4,3" vector-effect="non-scaling-stroke"/>';
+          solidSegs += '<line x1="'+xC.toFixed(1)+'" y1="'+horizonY.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+horizonY.toFixed(1)+'" stroke="var(--green)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
+        }
+      }
+    }
+    var eventTicks = "";
+    function addTick(dObj, color) {
+      if (!dObj) return;
+      var tTime = dObj.getTime();
+      if (tTime >= t0 && tTime <= t1) {
+        var tx = x(tTime).toFixed(1);
+        eventTicks += '<line x1="'+tx+'" y1="'+(padTop+plotH-3)+'" x2="'+tx+'" y2="'+(padTop+plotH+4)+'" stroke="'+color+'" stroke-width="1.5"/>';
+      }
+    }
+    addTick(riseDate, "var(--green)"); addTick(peakDate, "var(--cyan)"); addTick(setDate, "var(--red)");
+    var nowMark = "";
+    if (isToday) {
+      var nowX = x(now.getTime());
+      var c = Math.max(padX, Math.min(W-padX, nowX)).toFixed(1);
+      var b = Math.max(34, Math.min(W-34, nowX)).toFixed(1);
+      nowMark = '<line x1="'+c+'" y1="'+padTop+'" x2="'+c+'" y2="'+(padTop+plotH)+'" stroke="var(--amber)" stroke-width="2" stroke-dasharray="3,2" vector-effect="non-scaling-stroke"/>'
+        + '<circle cx="'+c+'" cy="'+(padTop+plotH)+'" r="3" fill="var(--amber)"/>'
+        + '<rect x="'+(b-28)+'" y="1" width="56" height="13" rx="3" fill="#070c16" stroke="var(--amber)" stroke-width="1.2"/>'
+        + '<text x="'+b+'" y="10.5" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" font-weight="700" fill="var(--amber)">ORA '+fmtTime(now)+'</text>';
+    }
+    var strokeColor = isVisibleNow ? "var(--cyan)" : "#3a567c";
+    var fillColor = isVisibleNow ? "rgba(81,160,213,0.15)" : "rgba(81,160,213,0.05)";
+    var zeroLabelX = 8, zeroLabelAnchor = "start";
+    if (isToday && x(now.getTime()) > W/2) { zeroLabelX = W-8; zeroLabelAnchor = "end"; }
+    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
+      + '<rect x="0" y="'+horizonY.toFixed(1)+'" width="'+W+'" height="'+(padTop+plotH-horizonY)+'" fill="rgba(6,11,21,0.65)"/>'
+      + dashSegs + solidSegs
+      + '<text x="'+zeroLabelX+'" y="'+(horizonY-3).toFixed(1)+'" text-anchor="'+zeroLabelAnchor+'" font-family="ui-monospace,monospace" font-size="9" font-weight="700" fill="var(--green)">0°</text>'
+      + '<path d="'+fillD+'" fill="'+fillColor+'" stroke="none"/>'
+      + '<path d="'+d+'" fill="none" stroke="'+strokeColor+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'
+      + eventTicks + nowMark
+      + '<text x="'+padX+'" y="'+(H-2)+'" text-anchor="start" font-family="ui-monospace,monospace" font-size="8" fill="var(--muted-2)">'+fmtTime(win.start)+'</text>'
+      + '<text x="'+(W-padX)+'" y="'+(H-2)+'" text-anchor="end" font-family="ui-monospace,monospace" font-size="8" fill="var(--muted-2)">'+fmtTime(win.end)+'</text>'
+      + '</svg>';
+  }
+  function magCategory(mag) {
+    if (mag <= 4.5) return "visibile a occhio nudo";
+    if (mag <= 6.0) return "al limite occhio nudo / binocolo";
+    if (mag <= 9.0) return "facile al telescopio";
+    return "richiede telescopio a piena apertura";
+  }
+  function altCategory(maxAlt) {
+    if (maxAlt <= 0) return { tag:"no", chip:"sotto orizzonte", label:"non sorge", dim:true };
+    if (maxAlt < 12) return { tag:"low", chip:"molto basso", label:"molto basso, turbolenza forte", dim:true };
+    if (maxAlt < 25) return { tag:"low", chip:"basso", label:"basso in cielo", dim:false };
+    return { tag:"good", chip:"ottimo", label:"buona altezza in cielo", dim:false };
+  }
+  function getDynamicEyepieceAdvice(key, alt) {
+    var jet = currentWeatherContext.jetSpeed;
+    var jetAvail = currentWeatherContext.jetAvailable;
+    var badSeeing = jetAvail && jet >= 115;
+    var fairSeeing = jetAvail && jet >= 65 && jet < 115;
+    if (key === "Moon") {
+      if (alt < 18) return "Luna bassa: usa 25mm (81x) per ridurre il tremolio.";
+      if (badSeeing) return "Seeing instabile: 25mm (81x) per panorami, 15mm (135x) sui crateri maggiori.";
+      if (fairSeeing) return "Seeing discreto: 15mm (135x) o 25mm+Barlow (162x) sul terminatore.";
+      return "Seeing eccellente: 15mm+Barlow (271x) sui crateri e pareti montuose!";
+    }
+    if (alt < 15) return "Troppo basso ("+Math.round(alt)+"°): resta sul 25mm (81x).";
+    if (key === "Mars") {
+      if (badSeeing || alt < 25) return "Instabile: usa 135x (15mm). Evita la Barlow.";
+      if (fairSeeing) return "Seeing medio: 25mm+Barlow (162x) ben bilanciato.";
+      return "Seeing ottimo: 15mm+Barlow (271x) per calotte e mari scuri!";
+    }
+    if (key === "Jupiter" || key === "Saturn") {
+      if (badSeeing) return "Vento in quota forte: fermati a 135x (15mm).";
+      if (fairSeeing) return "Seeing favorevole: 15mm (135x) o 25mm+Barlow (162x).";
+      return "Seeing eccellente: spingi a 271x (15mm+Barlow) per Cassini o bande fini.";
+    }
+    if (key === "Uranus" || key === "Neptune") return "Usa 15mm (135x) o 25mm+Barlow (162x). Oltre non ci sono dettagli aggiuntivi.";
+    return "Inizia con 25mm (81x) per centrare, passa a 15mm (135x).";
+  }
+  function bestFixed(obj, tStart, tEnd, obs) {
+    var best = { alt:-90, az:0, time:tStart };
+    for (var i=0; i<=48; i++) {
+      var d = new Date(tStart.getTime() + (tEnd-tStart)*i/48);
+      var hor = A.Horizon(d, obs, obj.ra, obj.dec, 'normal');
+      if (hor.altitude > best.alt) best = { alt:hor.altitude, az:hor.azimuth, time:d };
+    }
+    return best;
+  }
+  function findTransitTime(bodyKey, ra, obs, tStart, tEnd) {
+    if (bodyKey && A.Body[bodyKey]) {
+      try {
+        var evt = A.SearchHourAngle(A.Body[bodyKey], obs, 0, tStart, 1);
+        if (evt && evt.time && evt.time.date >= tStart && evt.time.date <= tEnd) return evt.time.date;
+        return null;
+      } catch(e){}
+    }
+    var stepMs = 3*60*1000, prevDiff = null;
+    for (var t = tStart.getTime(); t <= tEnd.getTime(); t += stepMs) {
+      var d = new Date(t); var gast = A.SiderealTime(d);
+      var lst = ((gast + obs.longitude/15) % 24 + 24) % 24;
+      var diff = lst - ra;
+      while (diff > 12) diff -= 24;
+      while (diff < -12) diff += 24;
+      if (prevDiff !== null && prevDiff < 0 && diff >= 0) {
+        var frac = -prevDiff / (diff - prevDiff);
+        return new Date(t - stepMs + frac*stepMs);
+      }
+      prevDiff = diff;
+    }
+    return null;
+  }
+  function compareTargets(a, b) {
+    if (a.isUpNow !== b.isUpNow) return a.isUpNow ? -1 : 1;
+    var magA = (typeof a.mag === 'number') ? a.mag : 99;
+    var magB = (typeof b.mag === 'number') ? b.mag : 99;
+    if (magA !== magB) return magA - magB;
+    return (b.alt || 0) - (a.alt || 0);
+  }
+  function renderNightTargets(obs, tStart, tEnd, planetCandidates, moonInfo) {
+    var el = document.getElementById('nightTargets'); if (!el) return;
+    var out = []; var now = new Date();
+    planetCandidates.forEach(function(p) {
+      var transit = findTransitTime(p.key, 0, obs, tStart, tEnd);
+      var eqNow = A.Equator(A.Body[p.key], now, obs, true, true);
+      var horNow = A.Horizon(now, obs, eqNow.ra, eqNow.dec, 'normal');
+      out.push({ kind:'planet', name:p.name, alt:p.maxAlt, az:p.maxAz, time:p.maxTime, mag:p.mag, distStr:formatCompactDistance(p.distKm,false), massRatio:PLANET_DATA[p.key].massRatio, url:p.url, extra:getDynamicEyepieceAdvice(p.key,p.maxAlt), source:'Astronomy Engine + EduINAF', transit:transit, isUpNow:horNow.altitude > 0 });
+    });
+    STAR_CATALOG.forEach(function(s) {
+      var b = bestFixed(s, tStart, tEnd, obs);
+      if (b.alt >= 15) {
+        var transit = findTransitTime(null, s.ra, obs, tStart, tEnd);
+        var horNow = A.Horizon(now, obs, s.ra, s.dec, 'normal');
+        out.push({ kind:'star', name:s.name, alt:b.alt, az:b.az, time:b.time, mag:s.mag, distStr:s.distLy.toFixed(1)+" A/Luce", massRatio:s.massRatio, url:s.url, extra:'25 mm (81x) per centrare, 15 mm (135x) per osservare', simbad:s.simbad, source:'J2000 + SIMBAD', transit:transit, isUpNow:horNow.altitude > 0 });
+      }
+    });
+    MESSIER.forEach(function(m) {
+      var b = bestFixed(m, tStart, tEnd, obs);
+      if (b.alt >= 18) {
+        var transit = findTransitTime(null, m.ra, obs, tStart, tEnd);
+        var horNow = A.Horizon(now, obs, m.ra, m.dec, 'normal');
+        var moonPenalty = 0;
+        if (moonInfo && moonInfo.illumFrac > 0.6 && moonInfo.altAt >= 25) moonPenalty = 1;
+        out.push({ kind:'deep', name:m.name, alt:b.alt, az:b.az, time:b.time, mag:m.mag, distStr:formatCompactDistance(0,true,m.distLy), massRatio:m.massRatio, url:m.url, extra:m.mag<=5?'25 mm (81x), poi 15 mm (135x)':'25 mm (81x), cielo buio e visione distolta', simbad:'https://simbad.cds.unistra.fr/simbad/sim-id?Ident='+encodeURIComponent(m.id), source:'J2000 + SIMBAD', transit:transit, moonPenalty:moonPenalty, isUpNow:horNow.altitude > 0 });
+      }
+    });
+    out.sort(compareTargets);
+    el.innerHTML = out.slice(0,18).map(function(x) {
+      var visTag = x.isUpNow ? '<span class="tag good">ORA VISIBILE</span>' : '<span class="tag no">SOTTO ORIZZONTE</span>';
+      var moonWarn = x.moonPenalty ? '<span class="moon-warn">Luna &gt; 60% e alta in cielo: oggetto debole penalizzato. Valuta un filtro UHC o rimanda.</span>' : '';
+      var infoText = visTag + '<span>Verso <b>'+compassDir(x.az)+'</b> (<b>'+Math.round(x.az)+'°</b>), <b>'+Math.round(x.alt)+'°</b> sopra orizzonte alle <b>'+fmtTime(x.time)+'</b>.</span>' + magSpan(x.mag);
+      var metaText = 'Dist: <b>'+x.distStr+'</b> · Massa: <b>'+x.massRatio+'</b>' + (x.transit ? ' · Culmina: <b>'+fmtTime(x.transit)+'</b>' : '');
+      return '<div class="target-card" data-kind="'+x.kind+'"><div class="target-head"><span class="target-name">'+x.name+'</span><span class="target-score">max '+Math.round(x.alt)+'°</span></div><div class="target-info">'+infoText+'</div><div class="target-meta">'+metaText+'</div><div class="target-c8">C8: '+x.extra+'</div>'+moonWarn+'<div class="astrolinks"><a href="'+x.url+'" target="_blank" rel="noopener">Scheda informativa ↗</a>'+(x.simbad?'<a href="'+x.simbad+'" target="_blank" rel="noopener">SIMBAD/CDS ↗</a>':'')+'</div><span class="source-pill">'+x.source+'</span></div>';
+    }).join('') || '<div class="section-note">Nessun bersaglio del catalogo selezionato supera la quota minima.</div>';
+  }
+  function compassSVG(azNow, altNow, size){
+    var R = size/2 - 16, cx = size/2, cy = size/2;
+    var rings = [0,30,60,90];
+    var svg = '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">';
+    rings.forEach(function(a){ var rr = R*(1-a/90); svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rr.toFixed(1)+'" fill="none" stroke="var(--line)" stroke-width="1"/>'; });
+    ["N","E","S","O"].forEach(function(dir,i){ var ang = i*90*Math.PI/180; var x = cx + (R+10)*Math.sin(ang), y = cy - (R+10)*Math.cos(ang); svg += '<text x="'+x.toFixed(1)+'" y="'+(y+4).toFixed(1)+'" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12" fill="var(--muted)">'+dir+'</text>'; });
+    if (altNow > 0) {
+      var r = R*(1-altNow/90), ang2 = azNow*Math.PI/180;
+      var px = cx + r*Math.sin(ang2), py = cy - r*Math.cos(ang2);
+      svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+px.toFixed(1)+'" y2="'+py.toFixed(1)+'" stroke="var(--amber)" stroke-width="1.2" opacity="0.6"/>';
+      svg += '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="7" fill="var(--amber)"/>';
+    } else { svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="rgba(231,76,60,0.08)"/>'; }
+    svg += '<circle cx="'+cx+'" cy="'+cy+'" r="2" fill="var(--muted-2)"/></svg>';
+    return svg;
+  }
+  function moonPhaseSVG(f, waxing, size) {
+    var r = size/2 - 2, cx = size/2, cy = size/2;
+    var svg = '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">';
+    svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#141f30" stroke="var(--line)"/>';
+    if (f > 0.008) {
+      var rx = r * Math.abs(1 - 2*f);
+      var sweep1 = waxing ? 1 : 0;
+      var sweep2 = (f < 0.5) ? (1 - sweep1) : sweep1;
+      var path = 'M '+cx+' '+(cy-r)+' A '+r+' '+r+' 0 0 '+sweep1+' '+cx+' '+(cy+r)+' A '+rx.toFixed(2)+' '+r+' 0 0 '+sweep2+' '+cx+' '+(cy-r)+' Z';
+      svg += '<path d="'+path+'" fill="var(--amber)"/>';
+    }
+    svg += '</svg>';
+    return svg;
+  }
+  function moonPhaseImageUrl(phaseAngle) {
+    var deg = Math.round(phaseAngle) % 360;
+    if (deg < 0) deg += 360;
+    return "https://commons.wikimedia.org/wiki/Special:FilePath/Phase-" + String(deg).padStart(3, '0') + ".jpg?width=400";
+  }
+  function closeModal(){ document.getElementById('modalRoot').innerHTML=''; document.body.classList.remove('modal-open'); }
+  function openCelestialModal(key){
+    var body = (key === "Moon") ? A.Body.Moon : A.Body[key];
+    var obs = new A.Observer(loc.lat, loc.lon, loc.elev);
+    var now = new Date();
+    var eqNow = A.Equator(body, now, obs, true, true);
+    var horNow = A.Horizon(now, obs, eqNow.ra, eqNow.dec, 'normal');
+    var illum = A.Illumination(body, now);
+    var cons = A.Constellation(eqNow.ra, eqNow.dec);
+    var title, facts, guide, radiusKm, massText;
+    if (key === "Moon") { title = "Luna"; facts = "Il satellite naturale della Terra."; guide = "Usa il telescopio lungo il terminatore."; radiusKm = 1737.4; massText = MOON_MASS_RATIO; }
+    else { title = PLANET_DATA[key].name; facts = PLANET_DATA[key].facts; guide = PLANET_DATA[key].guide; radiusKm = PLANET_DATA[key].radius; massText = PLANET_DATA[key].massRatio; }
+    var kmDist = illum.geo_dist * 149597870.7;
+    var angDiamArcsec = 206264.8 * (2 * radiusKm) / kmDist;
+    var sizeStr = (key === "Moon") ? (angDiamArcsec/60).toFixed(1)+"'" : angDiamArcsec.toFixed(1)+'"';
+    var posTxt = horNow.altitude > 0
+      ? 'In questo momento è a <b>'+compassDir(horNow.azimuth)+'</b> ('+Math.round(horNow.azimuth)+'°), a <b>'+Math.round(horNow.altitude)+'°</b> sopra l\'orizzonte.'
+      : 'In questo momento si trova <b>sotto l\'orizzonte</b> (azimut '+compassDir(horNow.azimuth)+' '+Math.round(horNow.azimuth)+'°).';
+    var win = getNightWindow(obs, new Date());
+    var transit = findTransitTime(key, 0, obs, win.start, win.end);
+    var moonImg = "", moonCap = "";
+    if (key === "Moon") {
+      var phaseAngle = A.MoonPhase(now);
+      var fMoon = illum.phase_fraction;
+      moonImg = '<img class="moon-phase-img" src="'+moonPhaseImageUrl(phaseAngle)+'" alt="Fase lunare" loading="lazy" onerror="this.style.display=\'none\'">';
+      moonCap = '<div class="moon-phase-caption">Fase attuale · '+Math.round(fMoon*100)+'% illuminata</div>';
+    }
+    var html = '<div class="modal-backdrop" id="modalBackdrop"><div class="modal-sheet"><div class="mtop"><h3>'+title+'</h3><button class="mclose" id="modalClose">&times;</button></div>'+moonImg+moonCap+'<div class="mfacts">'+facts+'</div><div class="beginner-guide" style="margin-bottom:12px;"><b>Consiglio osservativo:</b> '+guide+'</div><div class="compasswrap">'+compassSVG(horNow.azimuth, horNow.altitude, 220)+'</div><div class="note">'+posTxt+'</div><div class="mstats"><div class="datarow"><span>Costellazione</span><b>'+cons.name+'</b></div><div class="datarow"><span>Magnitudine</span>'+magSpan(illum.mag)+'</div><div class="datarow"><span>Diametro apparente</span><b>'+sizeStr+'</b></div><div class="datarow"><span>Distanza</span><b>'+formatCompactDistance(kmDist,false)+'</b></div><div class="datarow"><span>Massa rispetto alla Terra</span><b>'+massText+'</b></div><div class="datarow"><span>Culminazione (transito)</span><b>'+(transit?fmtTime(transit):'--:--')+'</b></div></div><button class="arbtn" id="btnAR">PUNTA CON LA FOTOCAMERA (AR)</button></div></div>';
+    document.getElementById('modalRoot').innerHTML = html;
+    document.body.classList.add('modal-open');
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalBackdrop').addEventListener('click', function(e){ if(e.target.id === 'modalBackdrop') closeModal(); });
+    document.getElementById('btnAR').addEventListener('click', function(){ startAR(key); });
+  }
+  var arState = { stream:null, headingHandler:null, timer:null };
+  function stopAR(){
+    if (arState.stream) { arState.stream.getTracks().forEach(function(t){ t.stop(); }); arState.stream = null; }
+    if (arState.headingHandler) { window.removeEventListener('deviceorientationabsolute', arState.headingHandler); window.removeEventListener('deviceorientation', arState.headingHandler); arState.headingHandler = null; }
+    if (arState.timer) { clearInterval(arState.timer); arState.timer = null; }
+    var v = document.getElementById('arRoot'); if (v) v.remove();
+  }
+  function startAR(key){
+    var root = document.createElement('div'); root.className = 'arview'; root.id = 'arRoot';
+    root.innerHTML = '<button class="arclose" id="arClose">&times;</button><div class="armsg" id="arMsg">Avvio sensori e fotocamera...</div>';
+    document.body.appendChild(root);
+    document.getElementById('arClose').addEventListener('click', stopAR);
+    var heading = null;
+    function onOrientation(e){
+      if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) heading = e.webkitCompassHeading;
+      else if (e.absolute && e.alpha !== null) heading = 360 - e.alpha;
+      else if (heading === null && e.alpha !== null) heading = 360 - e.alpha;
+    }
+    function setMsg(txt){ var msg = document.getElementById('arMsg'); if (msg) { msg.style.display = 'block'; msg.innerHTML = txt; } }
+    function startSensorsAndCamera(){
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setMsg('Accesso alla fotocamera non disponibile.'); return; }
+      setMsg('Richiesta autorizzazione fotocamera...');
+      navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' }, audio:false })
+      .then(function(stream){
+        arState.stream = stream; setMsg('Puntamento attivo. Inquadra il cielo...');
+        var video = document.createElement('video'); video.setAttribute('playsinline',''); video.autoplay = true; video.muted = true; video.srcObject = stream;
+        root.insertBefore(video, root.firstChild); video.play().catch(function(){});
+        var reticle = document.createElement('div'); reticle.className = 'arreticle'; reticle.style.display = 'none';
+        var label = document.createElement('div'); label.className = 'arlabel';
+        root.appendChild(reticle); root.appendChild(label);
+        arState.headingHandler = onOrientation;
+        window.addEventListener('deviceorientationabsolute', onOrientation, true);
+        window.addEventListener('deviceorientation', onOrientation, true);
+        var HFOV=62, VFOV=46, ticks=0;
+        var body = (key === "Moon") ? A.Body.Moon : A.Body[key];
+        var targetName = (key === "Moon") ? "Luna" : PLANET_DATA[key].name;
+        arState.timer = setInterval(function(){
+          ticks++;
+          var obs = new A.Observer(loc.lat, loc.lon, loc.elev);
+          var now = new Date();
+          var eq = A.Equator(body, now, obs, true, true);
+          var hor = A.Horizon(now, obs, eq.ra, eq.dec, 'normal');
+          if (heading === null) { if (ticks > 8) setMsg('In attesa della bussola... Calibra muovendo il telefono a forma di 8.'); reticle.style.display = 'none'; return; }
+          if (hor.altitude < 0) { setMsg('<b>'+targetName+'</b> è attualmente sotto l\'orizzonte.'); reticle.style.display = 'none'; return; }
+          var diffAz = ((hor.azimuth - heading + 540) % 360) - 180;
+          var diffAlt = hor.altitude - 45;
+          if (Math.abs(diffAz) < HFOV/2 && Math.abs(diffAlt) < VFOV/2) {
+            var msgEl = document.getElementById('arMsg'); if (msgEl) msgEl.style.display = 'none';
+            var x = 50 + (diffAz / (HFOV/2)) * 45; var y = 50 - (diffAlt / (VFOV/2)) * 45;
+            reticle.style.left = x + '%'; reticle.style.top = y + '%'; reticle.style.display = 'block';
+            label.innerHTML = targetName + ' · ' + Math.round(hor.altitude) + '°';
+          } else {
+            reticle.style.display = 'none';
+            setMsg((Math.abs(diffAz) >= HFOV/2 ? ('Gira verso ' + (diffAz > 0 ? 'destra &rarr;' : '&larr; sinistra') + '<br>') : '') + (Math.abs(diffAlt) >= VFOV/2 ? ('Alza o abbassa il telefono (' + (diffAlt > 0 ? 'più in alto' : 'più in basso') + ')') : ''));
+          }
+        }, 300);
+      }).catch(function(){ setMsg('Permesso fotocamera non concesso o dispositivo occupato.'); });
+    }
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(function(res){ if (res === 'granted') startSensorsAndCamera(); else setMsg('Permesso bussola negato.'); }).catch(startSensorsAndCamera);
+    } else { startSensorsAndCamera(); }
+  }
+  function updateEyepieceAdvice() {
+    var q = currentWeatherContext.seeingQuality;
+    var rows = document.querySelectorAll('table.eyepiece-table tr.ep-row');
+    var warning = currentWeatherContext.clouds > 70;
+    rows.forEach(function(row){
+      var minQ = parseInt(row.dataset.minQuality || "0", 10);
+      var disabled = warning || (q < minQ);
+      row.classList.toggle('warn-row', disabled);
+      var oldBadge = row.querySelector('.ep-badge');
+      if (oldBadge) oldBadge.remove();
+      if (disabled) {
+        var lastTd = row.querySelector('td:last-child');
+        if (lastTd) { var badge = document.createElement('span'); badge.className = 'ep-badge'; badge.textContent = 'SCONSIGLIATO'; lastTd.appendChild(badge); }
+      }
+    });
+    var note = document.getElementById('eyepieceLiveNote');
+    if (note) {
+      if (warning) note.innerHTML = '<b>Adattamento live:</b> cielo coperto ('+currentWeatherContext.clouds+'%), tutte le configurazioni sconsigliate.';
+      else if (q >= 2) note.innerHTML = '<b>Adattamento live:</b> seeing eccellente. Tutte le configurazioni sfruttabili.';
+      else if (q === 1) note.innerHTML = '<b>Adattamento live:</b> seeing discreto. Resta entro 162x.';
+      else note.innerHTML = '<b>Adattamento live:</b> seeing scarso. Usa solo 81x (25mm).';
+    }
+  }
+  function updateAstro() {
+    if (typeof Astronomy === 'undefined') return;
+    var obs = new A.Observer(loc.lat, loc.lon, loc.elev);
+    var now = new Date();
+    var win = getNightWindow(obs, activeDate);
+    var isToday = activeDate.toDateString() === new Date().toDateString();
+    document.getElementById('dateTitle').textContent = "Notte di " + win.start.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) + (isToday?' (stasera)':'');
+    document.getElementById('sunCycle').textContent = fmtTime(win.start) + " → " + fmtTime(win.end);
+    var dusk = A.SearchAltitude(A.Body.Sun, obs, -1, win.start, 1, -18);
+    var dawn = dusk ? A.SearchAltitude(A.Body.Sun, obs, +1, dusk.date, 1, -18) : null;
+    var darkEl = document.getElementById('astroDark');
+    if (dusk && dawn) darkEl.textContent = fmtTime(dusk.date) + " → " + fmtTime(dawn.date);
+    else darkEl.textContent = "Notte bianca (Sole mai < -18°)";
+    var midNight = (dusk && dawn) ? new Date((dusk.date.getTime() + dawn.date.getTime()) / 2) : addHours(win.start, 5);
+    var graphRef = isToday ? now : midNight;
+
+    var moonData = getBodyCycle(A.Body.Moon, obs, graphRef, 2);
+    var moonEqNow = A.Equator(A.Body.Moon, now, obs, true, true);
+    var moonHorNow = A.Horizon(now, obs, moonEqNow.ra, moonEqNow.dec, 'normal');
+    var moonIsUpNow = moonHorNow.altitude > 0;
+    var moonIllumNow = A.Illumination(A.Body.Moon, now);
+    var moonMag = moonIllumNow.mag;
+    var moonIllum = A.Illumination(A.Body.Moon, graphRef);
+    var phaseAngle = A.MoonPhase(graphRef);
+    var fMoon = moonIllum.phase_fraction;
+    var waxing = phaseAngle < 180;
+    var phaseNames = [[12,"Luna Nuova"],[82,"Luna Crescente"],[98,"Primo Quarto"],[168,"Gibbosa Crescente"],[192,"Luna Piena"],[262,"Gibbosa Calante"],[278,"Ultimo Quarto"],[348,"Luna Calante"],[360,"Luna Nuova"]];
+    var phaseName = "Luna Nuova";
+    for (var pn=0; pn<phaseNames.length; pn++) { if (phaseAngle <= phaseNames[pn][0]) { phaseName = phaseNames[pn][1]; break; } }
+    var moonDistKm = moonIllum.geo_dist * 149597870.7;
+    var moonDiamArcmin = ((206264.8 * (2*1737.4) / moonDistKm) / 60).toFixed(1);
+    var moonEqRef = A.Equator(A.Body.Moon, graphRef, obs, true, true);
+    var moonCons = A.Constellation(moonEqRef.ra, moonEqRef.dec);
+    document.getElementById('moonSvgWrap').innerHTML = moonPhaseSVG(fMoon, waxing, 48);
+    document.getElementById('moonNameTxt').innerHTML = phaseName + " (" + Math.round(fMoon*100) + "%) " + '<span class="tag ' + (moonIsUpNow ? 'good' : 'no') + '">' + (moonIsUpNow ? 'ORA VISIBILE' : 'SOTTO ORIZZONTE') + '</span>';
+    document.getElementById('moonSubTxt').textContent = "Diametro apparente " + moonDiamArcmin + "' · in " + moonCons.name;
+    var moonMagBox = document.getElementById('moonMagBox');
+    moonMagBox.className = 'pmag ' + magBrightnessClass(moonMag);
+    moonMagBox.innerHTML = magHTML(moonMag);
+    document.getElementById('moonPhysicsLine').innerHTML = "Dist: <b>" + formatCompactDistance(moonDistKm, false) + "</b> · Massa: <b>" + MOON_MASS_RATIO + "</b>";
+    document.getElementById('moonNowPos').innerHTML = moonIsUpNow ? "Ora: <b>" + compassDir(moonHorNow.azimuth) + "</b> (" + Math.round(moonHorNow.azimuth) + "°), <b>" + Math.round(moonHorNow.altitude) + "°</b> sopra l'orizzonte" : "<span style='color:var(--muted-2)'>Ora: sotto l'orizzonte (azimut " + compassDir(moonHorNow.azimuth) + " " + Math.round(moonHorNow.azimuth) + "°)</span>";
+    document.getElementById('moonTrack').innerHTML = sparkSVG(moonData.pts, now, moonData.win, moonData.rise, moonData.peak.t, moonData.set, moonIsUpNow, isToday);
+    document.getElementById('moonTimesRow').innerHTML = "<span>Sorge: " + fmtTime(moonData.rise) + "</span><span>Picco: " + Math.round(moonData.peak.alt) + "° (" + fmtTime(moonData.peak.t) + ")</span><span>Tramonta: " + fmtTime(moonData.set) + "</span>";
+    var moonTransit = findTransitTime('Moon', 0, obs, moonData.win.start, moonData.win.end);
+    document.getElementById('moonTransitLine').innerHTML = moonTransit ? 'Culmina (transito al meridiano) alle <b>'+fmtTime(moonTransit)+'</b>' : '';
+    document.getElementById('moonEyepieceTxt').textContent = getDynamicEyepieceAdvice("Moon", moonData.peak.alt);
+    document.getElementById('moonHeaderBox').onclick = function(){ openCelestialModal("Moon"); };
+    document.getElementById('btnMoonAR').onclick = function(e){ e.stopPropagation(); startAR("Moon"); };
+
+    var container = document.getElementById('planetCards');
+    container.innerHTML = "";
+    var candidates = [];
+    var planetsList = ["Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Mercury"];
+    var planetRenderQueue = [];
+    planetsList.forEach(function(pKey) {
+      var body = A.Body[pKey];
+      var data = PLANET_DATA[pKey];
+      var pData = getBodyCycle(body, obs, graphRef, 1);
+      var illum = A.Illumination(body, pData.peak.t);
+      var kmDist = illum.geo_dist * 149597870.7;
+      var diam = (206264.8 * (2*data.radius) / kmDist).toFixed(1);
+      var eqPeak = A.Equator(body, pData.peak.t, obs, true, true);
+      var cons = A.Constellation(eqPeak.ra, eqPeak.dec);
+      var ac = altCategory(pData.peak.alt);
+      var eqNow = A.Equator(body, now, obs, true, true);
+      var horNow = A.Horizon(now, obs, eqNow.ra, eqNow.dec, 'normal');
+      var isUpNow = horNow.altitude > 0;
+      var illumNow = A.Illumination(body, now);
+      var magNow = illumNow.mag;
+      var nowRow = isUpNow ? '<div class="nowpos">Ora: ' + compassDir(horNow.azimuth) + ' (' + Math.round(horNow.azimuth) + '°), ' + Math.round(horNow.altitude) + '° sopra l\'orizzonte</div>' : '<div class="nowpos dimtxt">Ora: sotto l\'orizzonte (azimut ' + compassDir(horNow.azimuth) + ' ' + Math.round(horNow.azimuth) + '°)</div>';
+      if (pData.peak.alt > 5) candidates.push({ key:pKey, name:data.name, maxAlt:pData.peak.alt, maxTime:pData.peak.t, maxAz:pData.peak.az, mag:illum.mag, diam:diam, cons:cons.name, distKm:kmDist, url:data.url });
+      var pTransit = findTransitTime(pKey, 0, obs, pData.win.start, pData.win.end);
+      var html = '<div class="prow1"><div class="pname">'+data.name+' <span class="cost">· '+cons.name+'</span> <span class="tag '+(isUpNow?'good':'no')+'">'+(isUpNow?'ORA VISIBILE':'SOTTO ORIZZONTE')+'</span></div><div class="pmag ' + magBrightnessClass(magNow) + '">' + magHTML(magNow) + '</div></div><span class="compact-metric">Dist: <b>'+formatCompactDistance(kmDist,false)+'</b> · Massa: <b>'+data.massRatio+'</b></span>'+nowRow+'<div class="ptrack">'+sparkSVG(pData.pts, now, pData.win, pData.rise, pData.peak.t, pData.set, isUpNow, isToday)+'</div><div class="prow2"><span>Sorge: '+fmtTime(pData.rise)+'</span><span>Picco: '+Math.round(pData.peak.alt)+'° ('+fmtTime(pData.peak.t)+')</span><span>Tramonta: '+fmtTime(pData.set)+'</span></div>'+(pTransit ? '<div class="compact-metric">Culmina alle <b>'+fmtTime(pTransit)+'</b></div>' : '')+'<div class="verdict"><b>'+ac.label+'</b> · diametro '+diam+'" · '+magCategory(illum.mag)+'<span class="eyepiece-advice">'+getDynamicEyepieceAdvice(pKey, pData.peak.alt)+'</span><div class="beginner-guide"><b>Guida per principianti:</b> '+data.guide+'</div></div><div class="astrolinks"><a href="'+data.url+'" target="_blank" rel="noopener">Scheda EduINAF ↗</a><button class="btn-ar-inline" data-ar="'+pKey+'">Inquadra con fotocamera</button></div>';
+      planetRenderQueue.push({ pKey: pKey, isUpNow: isUpNow, magNow: magNow, altNow: horNow.altitude, html: html, ac: ac });
+    });
+    planetRenderQueue.sort(function(a, b) {
+      if (a.isUpNow !== b.isUpNow) return a.isUpNow ? -1 : 1;
+      if (a.magNow !== b.magNow) return a.magNow - b.magNow;
+      return b.altNow - a.altNow;
+    });
+    planetRenderQueue.forEach(function(item) {
+      var card = document.createElement('div');
+      card.className = "planet-box" + (item.ac.dim ? " dim" : "");
+      card.setAttribute('data-key', item.pKey);
+      card.innerHTML = item.html;
+      card.addEventListener('click', function(){ openCelestialModal(item.pKey); });
+      var arBtn = card.querySelector('[data-ar]');
+      if (arBtn) arBtn.addEventListener('click', function(e){ e.stopPropagation(); startAR(item.pKey); });
+      container.appendChild(card);
+    });
+    var moonInfoForTargets = { illumFrac: fMoon, altAt: moonHorNow.altitude };
+    renderNightTargets(obs, win.start, win.end, candidates, moonInfoForTargets);
+
+    var pointerEl = document.getElementById('pointingTarget');
+    var validTargets = candidates.filter(function(c){ return c.maxAlt >= 18; });
+    if (validTargets.length > 0) {
+      validTargets.sort(function(a,b){ return (b.maxAlt - b.mag*3) - (a.maxAlt - a.mag*3); });
+      var best = validTargets[0];
+      var bestTransit = findTransitTime(best.key, 0, obs, win.start, win.end);
+      pointerEl.innerHTML = '<div class="point-card"><div class="point-label">DOVE INQUADRARE PER PRIMO STANOTTE</div><div class="point-name">↗ '+best.name+'</div><div class="point-main">Inquadra verso <b>'+compassDir(best.maxAz)+'</b> a circa <b>'+Math.round(best.maxAz)+'°</b> di azimut, <b>'+Math.round(best.maxAlt)+'°</b> sopra l\'orizzonte. '+magSpan(best.mag)+'<br><span style="font-size:12px; color:var(--muted);">Distanza: <b>'+formatCompactDistance(best.distKm,false)+'</b> · Massa: <b>'+PLANET_DATA[best.key].massRatio+'</b></span></div><div class="point-meta">Picco alle <b>'+fmtTime(best.maxTime)+'</b>'+(bestTransit?' · Culmina alle <b>'+fmtTime(bestTransit)+'</b>':'')+' in <b>'+best.cons+'</b>. Setup C8: <b>'+getDynamicEyepieceAdvice(best.key, best.maxAlt)+'</b><br><a href="'+best.url+'" target="_blank" rel="noopener" style="color:var(--cyan); text-decoration:none; display:inline-block; margin-top:5px;">Apri scheda didattica INAF per '+best.name+' ↗</a></div></div>';
+    } else {
+      pointerEl.innerHTML = '<div class="point-card"><div class="point-label">DOVE INQUADRARE PER PRIMO STANOTTE</div><div class="point-name">Luna o Oggetti Deep-Sky</div><div class="point-main">Nessun pianeta principale supera i 18° di quota stanotte.</div></div>';
+    }
+    var curMonth = win.start.getMonth(), curDay = win.start.getDate();
+    var activeShowers = SHOWERS.filter(function(s){
+      if (s.s[0] === s.e[0]) return curMonth === s.s[0] && curDay >= s.s[1] && curDay <= s.e[1];
+      return (curMonth === s.s[0] && curDay >= s.s[1]) || (curMonth === s.e[0] && curDay <= s.e[1]);
+    });
+    if (activeShowers.length > 0) document.getElementById('showersText').textContent = activeShowers.map(function(s){ return "• "+s.name+" (ZHR ~"+s.zhr+")"; }).join(' ');
+    else document.getElementById('showersText').textContent = "Nessuno sciame di rilievo al picco stanotte.";
+  }
+
+  /* ==== NUOVO: SISTEMA PERMESSI + PWA ==== */
+
+  // Stato permessi
+  var permState = { geo: 'wait', notif: 'wait', cam: 'wait' };
+
+  function setPermState(kind, state) {
+    permState[kind] = state;
+    var el = document.getElementById('permSt' + kind.charAt(0).toUpperCase() + kind.slice(1));
+    if (!el) return;
+    el.textContent = state === 'ok' ? '✓ OK' : state === 'no' ? '✗ Negato' : 'In attesa';
+    el.className = 'st ' + (state === 'ok' ? 'ok' : state === 'no' ? 'no' : 'wait');
+  }
+
+  function requestGeolocationPermission() {
+    return new Promise(function(resolve){
+      if (!navigator.geolocation) { setPermState('geo', 'no'); resolve(false); return; }
+      navigator.geolocation.getCurrentPosition(
+        function(pos){
+          loc.lat = pos.coords.latitude;
+          loc.lon = pos.coords.longitude;
+          loc.elev = pos.coords.altitude || 6;
+          loc.name = "Posizione GPS";
+          document.getElementById('locLabel').innerHTML = '<span class="online-dot" id="onlineDot"></span>' + loc.lat.toFixed(4) + '° N, ' + loc.lon.toFixed(4) + '° E · GPS';
+          setPermState('geo', 'ok');
+          resolve(true);
+        },
+        function(){ setPermState('geo', 'no'); resolve(false); },
+        { timeout: 8000, enableHighAccuracy: false }
+      );
+    });
+  }
+
+  function requestNotificationPermission() {
+    return new Promise(function(resolve){
+      if (!('Notification' in window)) { setPermState('notif', 'no'); resolve(false); return; }
+      if (Notification.permission === 'granted') { setPermState('notif', 'ok'); resolve(true); return; }
+      if (Notification.permission === 'denied') { setPermState('notif', 'no'); resolve(false); return; }
+      Notification.requestPermission().then(function(res){
+        var ok = res === 'granted';
+        setPermState('notif', ok ? 'ok' : 'no');
+        resolve(ok);
+      });
+    });
+  }
+
+  function requestCameraPermission() {
+    return new Promise(function(resolve){
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setPermState('cam', 'no'); resolve(false); return; }
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(stream){
+          stream.getTracks().forEach(function(t){ t.stop(); });
+          setPermState('cam', 'ok');
+          resolve(true);
+        })
+        .catch(function(){ setPermState('cam', 'no'); resolve(false); });
+    });
+  }
+
+  function runOnboarding() {
+    if (localStorage.getItem('astroalert_onboarded') === '1') return false;
+    document.getElementById('permOverlay').style.display = 'flex';
+
+    document.getElementById('permGrant').addEventListener('click', function(){
+      var btn = this; btn.disabled = true; btn.textContent = 'Richiesta in corso...';
+      requestGeolocationPermission()
+        .then(function(){ return requestNotificationPermission(); })
+        .then(function(){ return requestCameraPermission(); })
+        .then(function(){
+          localStorage.setItem('astroalert_onboarded', '1');
+          document.getElementById('permOverlay').style.display = 'none';
+          updateAstro(); fetchWeather(); fetchKp();
+          toast('Permessi configurati!', 2500);
+        });
+    });
+
+    document.getElementById('permSkip').addEventListener('click', function(){
+      localStorage.setItem('astroalert_onboarded', '1');
+      document.getElementById('permOverlay').style.display = 'none';
+    });
+
+    return true;
+  }
+
+  // PWA install prompt
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    installPromptEvent = e;
+    if (localStorage.getItem('astroalert_install_dismissed') === '1') return;
+    if (localStorage.getItem('astroalert_onboarded') !== '1') return;
+    setTimeout(showInstallBanner, 3000);
+  });
+
+  function showInstallBanner() {
+    if (document.querySelector('.install-banner')) return;
+    var banner = document.createElement('div');
+    banner.className = 'install-banner';
+    banner.innerHTML = '<div class="ib-txt"><b>Installa AstroAlert</b><br>Aggiungila alla home come app nativa.</div><button id="ibInstall">Installa</button><button class="ib-close" id="ibClose">✕</button>';
+    document.body.appendChild(banner);
+    document.getElementById('ibInstall').addEventListener('click', function(){
+      if (installPromptEvent) { installPromptEvent.prompt(); installPromptEvent.userChoice.then(function(){ banner.remove(); installPromptEvent = null; }); }
+    });
+    document.getElementById('ibClose').addEventListener('click', function(){
+      localStorage.setItem('astroalert_install_dismissed', '1');
+      banner.remove();
+    });
+  }
+
+  // Stato online/offline
+  function updateOnlineDot() {
+    var el = document.getElementById('onlineDot');
+    if (!el) return;
+    el.classList.toggle('off', !navigator.onLine);
+    el.title = navigator.onLine ? 'Online' : 'Offline';
+  }
+  window.addEventListener('online', updateOnlineDot);
+  window.addEventListener('offline', updateOnlineDot);
+
+  // Wake Lock (evita che lo schermo si spenga durante le sessioni)
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden && wakeLock === null) requestWakeLock();
+  });
+
+  // Service Worker (inline via Blob, funziona solo se il file è servito da HTTPS/http)
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    var swCode = `
+      const CACHE = 'astroalert-v1';
+      const ASSETS = [
+        './',
+        './index.html',
+        'https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js'
+      ];
+      self.addEventListener('install', e => {
+        e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})));
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+      self.addEventListener('fetch', e => {
+        if (e.request.method !== 'GET') return;
+        const url = new URL(e.request.url);
+        // Network-first per API meteo (dati freschi obbligatori)
+        if (url.hostname.includes('open-meteo') || url.hostname.includes('noaa.gov')) {
+          e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          return;
+        }
+        // Cache-first per assets statici
+        e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+          if (res && res.status === 200 && url.origin === location.origin) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        })));
+      });
+    `;
+    try {
+      var blob = new Blob([swCode], { type: 'application/javascript' });
+      var swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(function(){});
+    } catch(e) {}
+  }
+
+  function fetchWeather() {
+    var nocache = new Date().getTime();
+    var url = "https://api.open-meteo.com/v1/forecast?latitude="+loc.lat.toFixed(4)+"&longitude="+loc.lon.toFixed(4)
+      + "&current=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,wind_speed_10m"
+      + "&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,wind_speed_10m,wind_speed_850hPa,wind_speed_250hPa"
+      + "&timezone=Europe%2FRome&forecast_days=2&_nc="+nocache;
+    fetch(url).then(function(res){ if (!res.ok) throw new Error(); return res.json(); }).then(function(data){
+      var curr = data.current || {}, h = data.hourly || {}, curHour = new Date().getHours();
+      var currentClouds = curr.cloud_cover !== undefined ? Math.round(curr.cloud_cover) : 0;
+      var currentTemp = curr.temperature_2m !== undefined ? curr.temperature_2m.toFixed(1) : "--";
+      var currentRh = curr.relative_humidity_2m !== undefined ? Math.round(curr.relative_humidity_2m) : "--";
+      var currentDew = curr.dew_point_2m !== undefined ? curr.dew_point_2m.toFixed(1) : "--";
+      var currentWind10 = curr.wind_speed_10m !== undefined ? Math.round(curr.wind_speed_10m) : "--";
+      var wind850 = (h.wind_speed_850hPa && h.wind_speed_850hPa[curHour] !== undefined) ? Math.round(h.wind_speed_850hPa[curHour]) : null;
+      var wJet = (h.wind_speed_250hPa && h.wind_speed_250hPa[curHour] !== undefined) ? Math.round(h.wind_speed_250hPa[curHour]) : null;
+      var nightIdx = [21,22,23,24,25,26,27,28];
+      var cSum=0, cCount=0;
+      nightIdx.forEach(function(i){ if (h.cloud_cover && h.cloud_cover[i] !== undefined) { cSum += h.cloud_cover[i]; cCount++; } });
+      var avgClouds = cCount > 0 ? Math.round(cSum / cCount) : 0;
+      currentWeatherContext.clouds = currentClouds;
+      currentWeatherContext.jetSpeed = wJet !== null ? wJet : 999;
+      currentWeatherContext.jetAvailable = wJet !== null;
+      document.getElementById('mCloudsLive').textContent = currentClouds + "%";
+      document.getElementById('mCloudsAvg').textContent = avgClouds + "%";
+      document.getElementById('mTemp').textContent = currentTemp + "°C | " + currentRh + "%";
+      document.getElementById('mDew').textContent = currentDew + "°C";
+      document.getElementById('mWind10').textContent = currentWind10 + " km/h";
+      document.getElementById('mWind850').textContent = wind850 !== null ? (wind850 + " km/h") : "--";
+      document.getElementById('mJet').textContent = wJet !== null ? (wJet + " km/h") : "--";
+      var delta = parseFloat(currentTemp) - parseFloat(currentDew);
+      var condEl = document.getElementById('mCond');
+      if (!isNaN(delta)) {
+        if (delta < 2.5) condEl.innerHTML = '<span class="tag no">Critico (Δ '+delta.toFixed(1)+'°C)</span>';
+        else if (delta < 5.0) condEl.innerHTML = '<span class="tag low">Moderato (Δ '+delta.toFixed(1)+'°C)</span>';
+        else condEl.innerHTML = '<span class="tag good">Basso (Δ '+delta.toFixed(1)+'°C)</span>';
+      }
+      var seeEl = document.getElementById('mSeeing'), seeingQuality;
+      if (currentClouds > 70) { seeingQuality = 0; seeEl.innerHTML = '<span class="tag no">Cielo Coperto – Inosservabile</span>'; }
+      else if (wJet === null) { seeingQuality = 1; seeEl.innerHTML = '<span class="tag low">Jet Stream n.d. – stima su 135x</span>'; }
+      else if (wJet < 65 && (currentWind10 === "--" || currentWind10 < 15)) { seeingQuality = 2; seeEl.innerHTML = '<span class="tag good">Seeing Ottimo – Adatto per 162x e 271x</span>'; }
+      else if (wJet < 115) { seeingQuality = 1; seeEl.innerHTML = '<span class="tag low">Seeing Discreto – Usa 135x o 162x</span>'; }
+      else { seeingQuality = 0; seeEl.innerHTML = '<span class="tag no">Forte Jet Stream ('+wJet+' km/h) – Limitarsi a 81x</span>'; }
+      currentWeatherContext.seeingQuality = seeingQuality;
+      updateEyepieceAdvice();
+      updateAstro();
+    }).catch(function(){ document.getElementById('mSeeing').textContent = "Dati meteo live non disponibili"; });
+  }
+
+  function fetchKp() {
+    fetch("https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json").then(function(res){ if (!res.ok) throw new Error(); return res.json(); }).then(function(rows){
+      var last = rows[rows.length-1];
+      var kp = parseFloat(last.Kp !== undefined ? last.Kp : last[1]);
+      document.getElementById('mKp').textContent = isNaN(kp) ? "N/D" : kp.toFixed(1);
+    }).catch(function(){ document.getElementById('mKp').textContent = "N/D"; });
+  }
+
+  function geocodeCity(query) {
+    var resEl = document.getElementById('locResults');
+    resEl.innerHTML = '<div class="loc-item">Ricerca coordinate in corso...</div>';
+    var url = "https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=4&language=it&format=json";
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if (!data.results || !data.results.length) { resEl.innerHTML = '<div class="loc-item">Nessuna località trovata.</div>'; return; }
+      resEl.innerHTML = data.results.map(function(item, idx){
+        var sub = [item.admin1, item.country].filter(Boolean).join(", ");
+        return '<div class="loc-item" data-idx="'+idx+'"><b>'+item.name+'</b> <span>('+sub+')</span></div>';
+      }).join("");
+      data.results.forEach(function(item, idx){
+        var el = resEl.querySelector('[data-idx="'+idx+'"]');
+        if (el) el.addEventListener('click', function(){
+          loc.lat = item.latitude; loc.lon = item.longitude; loc.elev = item.elevation || 6;
+          loc.name = item.name + (item.admin1 ? " ("+item.admin1+")" : "");
+          document.getElementById('locLabel').innerHTML = '<span class="online-dot" id="onlineDot"></span>' + loc.lat.toFixed(4)+"° N, "+loc.lon.toFixed(4)+"° E · "+loc.name;
+          updateOnlineDot();
+          resEl.innerHTML = ""; document.getElementById('locInput').value = "";
+          updateAstro(); fetchWeather();
+        });
+      });
+    }).catch(function(){ resEl.innerHTML = '<div class="loc-item">Errore di connessione.</div>'; });
+  }
+
+  function acquireGps() {
+    if (!navigator.geolocation) return;
+    var btn = document.getElementById('btnGps'); btn.textContent = "Rilevamento...";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      loc.lat = pos.coords.latitude; loc.lon = pos.coords.longitude; loc.elev = pos.coords.altitude || 6;
+      loc.name = "Posizione GPS Attuale";
+      document.getElementById('locLabel').innerHTML = '<span class="online-dot" id="onlineDot"></span>' + loc.lat.toFixed(4)+"° N, "+loc.lon.toFixed(4)+"° E · GPS";
+      updateOnlineDot();
+      btn.textContent = "GPS Attivo"; updateAstro(); fetchWeather();
+    }, function(){ btn.textContent = "GPS Negato"; }, { timeout:6000 });
+  }
+
+  function init() {
+    updateOnlineDot();
+
+    // Se è il primo avvio mostra l'onboarding
+    var onboardingShown = runOnboarding();
+
+    if (!onboardingShown) {
+      // Avvio normale
+      updateAstro(); fetchWeather(); fetchKp();
+      // Se già configurato, chiedi wake lock e prova a riprendere la posizione
+      requestWakeLock();
+    }
+
+    document.getElementById('btnGps').addEventListener('click', acquireGps);
+    document.getElementById('btnSearchCity').addEventListener('click', function(){ var q = document.getElementById('locInput').value.trim(); if (q.length > 1) geocodeCity(q); });
+    document.getElementById('locInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') { var q = this.value.trim(); if (q.length > 1) geocodeCity(q); } });
+    document.querySelectorAll('#filterToolbar button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('#filterToolbar button').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active'); var f = btn.dataset.filter;
+        document.querySelectorAll('.target-card').forEach(function(c){ c.classList.toggle('hidden-target', f !== 'all' && c.dataset.kind !== f); });
+      });
+    });
+    document.getElementById('btnToday').addEventListener('click', function(){ activeDate = new Date(); updateAstro(); fetchWeather(); });
+    document.getElementById('btnPrev').addEventListener('click', function(){ activeDate.setDate(activeDate.getDate()-1); updateAstro(); fetchWeather(); });
+    document.getElementById('btnNext').addEventListener('click', function(){ activeDate.setDate(activeDate.getDate()+1); updateAstro(); fetchWeather(); });
+
+    // ============ INTERVALLI AGGIORNAMENTO ============
+    // Astronomia: ogni 60 secondi (calcolo locale, gratuito)
+    setInterval(function(){ updateAstro(); }, 60 * 1000);
+    // Meteo e Kp: ogni 5 minuti (come richiesto)
+    setInterval(function(){ fetchWeather(); fetchKp(); }, 5
