@@ -8,8 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>AstroAlert Pro - C8 SE</title>
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22AstroAlert%20Pro%22%2C%22short_name%22%3A%22AstroAlert%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070c16%22%2C%22theme_color%22%3A%22%23070c16%22%2C%22lang%22%3A%22it%22%7D">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22AstroAlert%22%2C%22short_name%22%3A%22AstroAlert%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070c16%22%2C%22theme_color%22%3A%22%23070c16%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2745%27%20fill%3D%27%2523f2b84b%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2745%27%20fill%3D%27%2523f2b84b%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23070c16'/%3E%3Ccircle cx='50' cy='50' r='34' fill='%23f2b84b'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23070c16'/%3E%3Ccircle cx='50' cy='50' r='34' fill='%23f2b84b'/%3E%3C/svg%3E">
 <style>
 :root{--bg:#070c16;--panel:#0f1828;--panel-2:#0a111d;--line:#1c2d46;--text:#e7edf6;--muted:#8ca0ba;--muted-2:#586982;--amber:#f2b84b;--cyan:#51a0d5;--green:#2ecc71;--red:#e74c3c;--mono:ui-monospace,"SF Mono","Roboto Mono",Consolas,monospace;--sans:Roboto,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -30,8 +31,9 @@ header{border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:12p
 .loc-item{padding:10px 12px;border:1px solid var(--line);background:var(--panel-2);border-radius:6px;margin-top:5px;font-size:13px;cursor:pointer}
 .loc-item span{color:var(--muted-2);font-size:11.5px}
 .navrow{display:flex;gap:8px;margin-bottom:12px}
-.navrow button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:10px 6px;border-radius:6px;font-size:12.5px;cursor:pointer;min-height:44px}
+.navrow button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:10px 6px;border-radius:6px;font-size:12.5px;cursor:pointer;min-height:44px;transition:opacity 0.2s}
 .navrow button.primary{border-color:var(--amber);color:var(--amber);font-weight:600}
+.navrow button:disabled{opacity:0.35;cursor:not-allowed}
 .point-card{border:1px solid var(--cyan);background:linear-gradient(160deg,rgba(81,160,213,0.15),var(--panel));border-radius:8px;padding:14px;margin-bottom:12px}
 .point-card .point-label{font-family:var(--mono);font-size:10.5px;color:var(--cyan);font-weight:700;letter-spacing:0.05em}
 .point-card .point-name{font-size:22px;font-weight:700;margin:4px 0}
@@ -121,6 +123,7 @@ details.collapse[open] summary::after{content:"−"}
 details.collapse > div{padding:10px 14px;border-top:1px solid var(--line)}
 .note{font-size:11.5px;color:var(--muted);background:var(--panel-2);border-left:3px solid var(--cyan);padding:9px 12px;margin-top:8px;border-radius:0 4px 4px 0}
 .note b{color:var(--text)}
+.note.err{border-left-color:var(--red);color:var(--red)}
 .modal-backdrop{position:fixed;inset:0;background:rgba(4,8,14,0.85);z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .modal-sheet{width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;padding:18px 18px 30px}
 .modal-sheet .mtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -133,7 +136,7 @@ details.collapse > div{padding:10px 14px;border-top:1px solid var(--line)}
 .datarow span{color:var(--muted)}
 .datarow b{font-family:var(--mono);color:var(--text)}
 .arbtn{width:100%;background:linear-gradient(160deg,rgba(242,184,75,0.16),var(--panel-2));border:1px solid var(--amber);color:var(--amber);padding:12px;border-radius:6px;font-size:14px;font-weight:700;margin-top:14px;cursor:pointer;min-height:48px;font-family:var(--mono)}
-.moon-phase-img{display:block;width:170px;height:170px;margin:4px auto 8px;border-radius:50%;border:2px solid var(--line);background:#000;object-fit:cover}
+.moon-phase-svg-wrap{display:flex;justify-content:center;margin:4px 0 8px}
 .moon-phase-caption{text-align:center;font-size:11px;color:var(--muted);margin-bottom:12px;font-family:var(--mono)}
 .arview{position:fixed;inset:0;z-index:60;background:#000}
 .arview video{width:100%;height:100%;object-fit:cover}
@@ -155,6 +158,7 @@ footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-si
 .perm-row .st.ok{color:var(--green);border-color:var(--green);background:rgba(46,204,113,0.12)}
 .perm-row .st.no{color:var(--red);border-color:var(--red);background:rgba(231,76,60,0.12)}
 .perm-row .st.wait{color:var(--amber);border-color:var(--amber);background:rgba(242,184,75,0.12)}
+.perm-row .st.na{color:var(--muted-2);border-color:var(--line);background:transparent}
 .perm-btn{width:100%;background:linear-gradient(160deg,rgba(242,184,75,0.2),rgba(242,184,75,0.08));border:1px solid var(--amber);color:var(--amber);padding:14px;border-radius:8px;font-size:15px;font-weight:700;margin-top:16px;cursor:pointer;font-family:var(--mono);min-height:52px}
 .perm-btn:disabled{opacity:0.4}
 .perm-skip{width:100%;background:transparent;border:none;color:var(--muted);font-size:12px;padding:12px;margin-top:6px;cursor:pointer;font-family:var(--mono);text-decoration:underline}
@@ -172,7 +176,7 @@ footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-si
     <h2>Benvenuto in AstroAlert</h2>
     <div class="sub">Per funzionare al meglio, l'app ha bisogno di alcuni permessi. Sono tutti facoltativi tranne la posizione, che puoi anche impostare manualmente.</div>
     <div class="perm-row"><div class="ico">📍</div><div class="txt"><div class="ttl">Posizione</div><div class="desc">Per calcolare effemeridi e meteo sulla tua località</div></div><div class="st wait" id="permStGeo">In attesa</div></div>
-    <div class="perm-row"><div class="ico">🔔</div><div class="txt"><div class="ttl">Notifiche</div><div class="desc">Solo desktop — non utilizzate su Android</div></div><div class="st wait" id="permStNotif">In attesa</div></div>
+    <div class="perm-row"><div class="ico">🔔</div><div class="txt"><div class="ttl">Notifiche</div><div class="desc">Solo su desktop — non utilizzate su Android</div></div><div class="st wait" id="permStNotif">In attesa</div></div>
     <div class="perm-row"><div class="ico">📷</div><div class="txt"><div class="ttl">Fotocamera</div><div class="desc">Per il puntamento AR dei pianeti in tempo reale</div></div><div class="st wait" id="permStCam">In attesa</div></div>
     <button class="perm-btn" id="permGrant">Concedi tutti i permessi</button>
     <button class="perm-skip" id="permSkip">Salta — configurerò dopo</button>
@@ -181,7 +185,7 @@ footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-si
 
 <header>
   <div class="loc-bar">
-    <span id="locLabel"><span class="online-dot" id="onlineDot"></span>40.6947° N, 14.4803° E · Castellammare di Stabia</span>
+    <span id="locLabel">Caricamento posizione...</span>
     <button class="btn-ui" id="btnGps">Usa GPS</button>
   </div>
   <div class="loc-search-box">
@@ -205,7 +209,7 @@ footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-si
   <div class="card-head">METEO &amp; SEEING AVANZATO</div>
   <div class="grid">
     <div><span class="label">Nuvole ORA (Live):</span><span class="val" id="mCloudsLive">--%</span></div>
-    <div><span class="label">Media Notte Nuvole:</span><span class="val" id="mCloudsAvg">--%</span></div>
+    <div><span class="label">Media Buio Astronomico:</span><span class="val" id="mCloudsAvg">--%</span></div>
     <div><span class="label">Temp ORA | Umidità:</span><span class="val" id="mTemp">--°C | --%</span></div>
     <div><span class="label">Punto di Rugiada ORA:</span><span class="val" id="mDew">--°C</span></div>
     <div><span class="label">Vento a terra (10 m):</span><span class="val" id="mWind10">-- km/h</span></div>
@@ -251,7 +255,7 @@ footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-si
 
 <div class="card">
   <div class="card-head">PIANETI NEL CORSO DELLA NOTTE</div>
-  <div class="section-note">Ogni curva mostra <b>24 ore esatte</b>. Ordinati per <b>visibilità ORA</b> e poi per <b>magnitudine</b> (i più brillanti in alto).</div>
+  <div class="section-note">Ogni curva mostra <b>24 ore esatte</b>. Ordinati per <b>visibilità ORA</b> e poi per <b>magnitudine</b>.</div>
   <div id="planetCards">Calcolo posizioni orbitali in corso...</div>
 </div>
 
@@ -350,8 +354,21 @@ function formatCompactDistance(km,isFarDeepSky,fixedLy){
   var lightStr=minLight<1?(minLight*60).toFixed(1)+" Sec/Luce":minLight.toFixed(1)+" Min/Luce";
   return kmStr+" ("+lightStr+")";
 }
+function isAndroid(){return /Android/i.test(navigator.userAgent);}
+function dateToIsoHourStr(d){
+  var y=d.getFullYear();
+  var mo=String(d.getMonth()+1).padStart(2,'0');
+  var da=String(d.getDate()).padStart(2,'0');
+  var hh=String(d.getHours()).padStart(2,'0');
+  return y+'-'+mo+'-'+da+'T'+hh+':00';
+}
+function daysFromToday(d){
+  var today=new Date();today.setHours(12,0,0,0);
+  var dd=new Date(d);dd.setHours(12,0,0,0);
+  return Math.round((dd-today)/86400000);
+}
 
-/* FIX Android: banner contesto non sicuro */
+/* Banner contesto non sicuro */
 function checkSecureContext(){
   if(window.isSecureContext)return true;
   var banner=document.createElement('div');
@@ -361,6 +378,20 @@ function checkSecureContext(){
     +'Apri da <b>https://</b> (GitHub Pages) o <b>http://localhost</b>.';
   document.body.insertBefore(banner,document.body.firstChild);
   return false;
+}
+
+/* FIX P1-2: fallback errore CDN */
+function showCdnError(){
+  var t=document.getElementById('dateTitle');
+  if(t)t.textContent="⚠ Motore astronomico non disponibile";
+  var p=document.getElementById('planetCards');
+  if(p)p.innerHTML='<div class="note err"><b>Errore critico:</b> la libreria Astronomy Engine non è stata caricata (cdn.jsdelivr.net non risponde). Verifica la connessione internet e ricarica la pagina.</div>';
+  var n=document.getElementById('nightTargets');
+  if(n)n.innerHTML='<div class="section-note">In attesa del motore astronomico...</div>';
+  var tr=document.getElementById('moonTrack');
+  if(tr)tr.innerHTML='';
+  var nm=document.getElementById('moonNameTxt');
+  if(nm)nm.textContent='--';
 }
 
 /* ============ DATI ASTRONOMICI ============ */
@@ -410,6 +441,12 @@ function getNightWindow(obs,anchorDate){
   var sunset=A.SearchRiseSet(A.Body.Sun,obs,-1,base,1);
   var sunrise=A.SearchRiseSet(A.Body.Sun,obs,+1,sunset?sunset.date:base,1);
   return {start:sunset?sunset.date:base,end:sunrise?sunrise.date:addHours(base,12)};
+}
+function getAstroDarkWindow(obs,anchorDate){
+  var win=getNightWindow(obs,anchorDate);
+  var dusk=A.SearchAltitude(A.Body.Sun,obs,-1,win.start,1,-18);
+  var dawn=dusk?A.SearchAltitude(A.Body.Sun,obs,+1,dusk.date,1,-18):null;
+  return {start:dusk?dusk.date:null,end:dawn?dawn.date:null,sunset:win.start,sunrise:win.end};
 }
 function getBodyCycle(body,obs,refTime,limitDays){
   var lim=limitDays||2;
@@ -642,7 +679,6 @@ function moonPhaseSVG(f,waxing,size){
   svg+='</svg>';
   return svg;
 }
-function moonPhaseImageUrl(phaseAngle){var deg=Math.round(phaseAngle)%360;if(deg<0)deg+=360;return "https://commons.wikimedia.org/wiki/Special:FilePath/Phase-"+String(deg).padStart(3,'0')+".jpg?width=400";}
 
 /* ============ MODAL / AR ============ */
 function closeModal(){document.getElementById('modalRoot').innerHTML='';document.body.classList.remove('modal-open');}
@@ -664,7 +700,13 @@ function openCelestialModal(key){
   var win=getNightWindow(obs,activeDate);
   var transit=findTransitTime(key,0,obs,win.start,win.end);
   var moonImg="",moonCap="";
-  if(key==="Moon"){var phaseAngle=A.MoonPhase(now);var fMoon=illum.phase_fraction;moonImg='<img class="moon-phase-img" src="'+moonPhaseImageUrl(phaseAngle)+'" alt="Fase lunare" loading="lazy" onerror="this.style.display=\'none\'">';moonCap='<div class="moon-phase-caption">Fase attuale · '+Math.round(fMoon*100)+'% illuminata</div>';}
+  if(key==="Moon"){
+    /* FIX P0: rimosso <img> Wikimedia 404, usa SVG inline */
+    var phaseAngle=A.MoonPhase(now);
+    var fMoon=illum.phase_fraction;
+    moonImg='<div class="moon-phase-svg-wrap">'+moonPhaseSVG(fMoon,phaseAngle<180,170)+'</div>';
+    moonCap='<div class="moon-phase-caption">Fase attuale · '+Math.round(fMoon*100)+'% illuminata</div>';
+  }
   var html='<div class="modal-backdrop" id="modalBackdrop"><div class="modal-sheet"><div class="mtop"><h3>'+title+'</h3><button class="mclose" id="modalClose">&times;</button></div>'+moonImg+moonCap+'<div class="mfacts">'+facts+'</div><div class="beginner-guide" style="margin-bottom:12px;"><b>Consiglio osservativo:</b> '+guide+'</div><div class="compasswrap">'+compassSVG(horNow.azimuth,horNow.altitude,220)+'</div><div class="note">'+posTxt+'</div><div class="mstats"><div class="datarow"><span>Costellazione</span><b>'+cons.name+'</b></div><div class="datarow"><span>Magnitudine</span>'+magSpan(illum.mag)+'</div><div class="datarow"><span>Diametro apparente</span><b>'+sizeStr+'</b></div><div class="datarow"><span>Distanza</span><b>'+formatCompactDistance(kmDist,false)+'</b></div><div class="datarow"><span>Massa rispetto alla Terra</span><b>'+massText+'</b></div><div class="datarow"><span>Culminazione (transito)</span><b>'+(transit?fmtTime(transit):'--:--')+'</b></div></div><button class="arbtn" id="btnAR">PUNTA CON LA FOTOCAMERA (AR)</button></div></div>';
   document.getElementById('modalRoot').innerHTML=html;
   document.body.classList.add('modal-open');
@@ -753,6 +795,17 @@ function updateEyepieceAdvice(){
     else if(q===1)note.innerHTML='<b>Adattamento live:</b> seeing discreto. Resta entro 162x.';
     else note.innerHTML='<b>Adattamento live:</b> seeing scarso. Usa solo 81x (25mm).';
   }
+}
+
+/* ============ NAV BUTTONS ============ */
+/* FIX P2: limiti prev/next -1 / +3 */
+function canGoPrev(){return daysFromToday(activeDate) > -1;}
+function canGoNext(){return daysFromToday(activeDate) < 3;}
+function updateNavButtons(){
+  var bp=document.getElementById('btnPrev');
+  var bn=document.getElementById('btnNext');
+  if(bp){bp.disabled=!canGoPrev();bp.style.opacity=canGoPrev()?'1':'0.35';}
+  if(bn){bn.disabled=!canGoNext();bn.style.opacity=canGoNext()?'1':'0.35';}
 }
 
 /* ============ UPDATE ASTRONOMIA ============ */
@@ -868,9 +921,33 @@ function updateAstro(){
   });
   if(activeShowers.length>0)document.getElementById('showersText').textContent=activeShowers.map(function(s){return "• "+s.name+" (ZHR ~"+s.zhr+")";}).join(' ');
   else document.getElementById('showersText').textContent="Nessuno sciame di rilievo al picco stanotte.";
+
+  /* FIX P2: aggiorna stato pulsanti prev/next */
+  updateNavButtons();
 }
 
 /* ============ METEO ============ */
+/* FIX P1-1: indici orari basati sul buio astronomico reale */
+function computeNightIdxRange(hTimeArr, obs, anchorDate, dayOffsetFallback){
+  var fallback=[21,22,23,24,25,26,27,28].map(function(i){return i+dayOffsetFallback*24;});
+  if(typeof Astronomy==='undefined' || !hTimeArr || !hTimeArr.length) return fallback;
+  try{
+    var darkWin=getAstroDarkWindow(obs,anchorDate);
+    if(!darkWin.start || !darkWin.end) return fallback;
+    var duskStr=dateToIsoHourStr(darkWin.start);
+    var dawnStr=dateToIsoHourStr(darkWin.end);
+    var idxStart=-1, idxEnd=-1;
+    for(var i=0;i<hTimeArr.length;i++){
+      var t=hTimeArr[i];
+      if(t >= duskStr && idxStart < 0) idxStart=i;
+      if(t <= dawnStr) idxEnd=i;
+    }
+    if(idxStart<0 || idxEnd<0 || idxStart>idxEnd) return fallback;
+    var out=[];
+    for(var j=idxStart;j<=idxEnd;j++) out.push(j);
+    return out.length?out:fallback;
+  }catch(e){return fallback;}
+}
 function fetchWeather(){
   var dateToUse=new Date(activeDate);dateToUse.setHours(12,0,0,0);
   var today=new Date();today.setHours(12,0,0,0);
@@ -883,7 +960,23 @@ function fetchWeather(){
   fetch(url).then(function(res){if(!res.ok)throw new Error();return res.json();}).then(function(data){
     var curr=data.current||{},h=data.hourly||{};
     var hourOffset=dayOffset*24;
-    var refIdx=dayOffset===0?new Date().getHours():(hourOffset+23);
+    var refIdx;
+    if(dayOffset===0){
+      refIdx=new Date().getHours();
+    }else{
+      /* FIX P1-1: prende l'ora centrale del buio astronomico */
+      try{
+        var obsR=new A.Observer(loc.lat,loc.lon,loc.elev);
+        var darkR=getAstroDarkWindow(obsR,activeDate);
+        if(darkR.start && darkR.end && h.time && h.time.length){
+          var midD=new Date((darkR.start.getTime()+darkR.end.getTime())/2);
+          var midStr=dateToIsoHourStr(midD);
+          var found=-1;
+          for(var ri=0;ri<h.time.length;ri++){if(h.time[ri]>=midStr){found=ri;break;}}
+          refIdx=found>=0?found:(hourOffset+23);
+        }else{refIdx=hourOffset+23;}
+      }catch(e){refIdx=hourOffset+23;}
+    }
     function valAt(arr,idx){if(!arr||idx<0||idx>=arr.length)return null;return arr[idx];}
     var currentClouds,currentTemp,currentRh,currentDew,currentWind10;
     if(dayOffset===0){
@@ -904,10 +997,19 @@ function fetchWeather(){
     var wJet=valAt(h.wind_speed_250hPa,refIdx);
     wind850=wind850!==null?Math.round(wind850):null;
     wJet=wJet!==null?Math.round(wJet):null;
-    var nightIdx=[21,22,23,24,25,26,27,28].map(function(i){return i+hourOffset;});
+
+    /* FIX P1-1: indici nuvole calcolati dal buio astronomico */
+    var nightIdx;
+    try{
+      var obsN=new A.Observer(loc.lat,loc.lon,loc.elev);
+      nightIdx=computeNightIdxRange(h.time,obsN,activeDate,dayOffset);
+    }catch(e){
+      nightIdx=[21,22,23,24,25,26,27,28].map(function(i){return i+hourOffset;});
+    }
     var cSum=0,cCount=0;
     nightIdx.forEach(function(i){var v=valAt(h.cloud_cover,i);if(v!==null){cSum+=v;cCount++;}});
     var avgClouds=cCount>0?Math.round(cSum/cCount):0;
+
     currentWeatherContext.clouds=currentClouds;
     currentWeatherContext.jetSpeed=wJet!==null?wJet:999;
     currentWeatherContext.jetAvailable=wJet!==null;
@@ -999,8 +1101,8 @@ function setPermState(kind,state){
   permState[kind]=state;
   var el=document.getElementById('permSt'+kind.charAt(0).toUpperCase()+kind.slice(1));
   if(!el)return;
-  el.textContent=state==='ok'?'✓ OK':state==='no'?'✗ Negato':'In attesa';
-  el.className='st '+(state==='ok'?'ok':state==='no'?'no':'wait');
+  el.textContent=state==='ok'?'✓ OK':state==='no'?'✗ Negato':state==='na'?'Non applicabile':'In attesa';
+  el.className='st '+(state==='ok'?'ok':state==='no'?'no':state==='na'?'na':'wait');
 }
 function requestGeolocationPermission(){
   return new Promise(function(resolve){
@@ -1017,8 +1119,14 @@ function requestGeolocationPermission(){
     );
   });
 }
+/* FIX P2: skip permesso notifiche su Android */
 function requestNotificationPermission(){
   return new Promise(function(resolve){
+    if(isAndroid()){
+      setPermState('notif','na');
+      resolve(false);
+      return;
+    }
     if(!('Notification' in window)){setPermState('notif','no');resolve(false);return;}
     if(Notification.permission==='granted'){setPermState('notif','ok');resolve(true);return;}
     if(Notification.permission==='denied'){setPermState('notif','no');resolve(false);return;}
@@ -1041,12 +1149,17 @@ function shouldShowOnboarding(){
   if(!window.isSecureContext)return true;
   var flagOk=safeGet('astroalert_onboarded')==='1';
   if(!flagOk)return true;
-  if('Notification' in window&&Notification.permission==='default')return true;
+  /* FIX P2: solo se non siamo su Android controlliamo il permesso notifiche */
+  if(!isAndroid() && 'Notification' in window && Notification.permission==='default')return true;
   return false;
 }
 function runOnboarding(){
   if(!shouldShowOnboarding())return false;
   document.getElementById('permOverlay').style.display='flex';
+  if(isAndroid()){
+    var sn=document.getElementById('permStNotif');
+    if(sn){sn.textContent='Non applicabile';sn.className='st na';}
+  }
   if(!window.isSecureContext){
     var btn=document.getElementById('permGrant');
     btn.disabled=true;
@@ -1103,14 +1216,26 @@ document.addEventListener('visibilitychange',function(){
   else if(!wakeLock){requestWakeLock();}
 });
 
-/* NOTA: Service Worker volutamente NON registrato in questa versione
-   single-file. Su Android richiederebbe un file sw.js separato. */
-
 /* ============ INIT ============ */
 function init(){
   checkSecureContext();
-  updateOnlineDot();
   updateLocLabel();
+  updateOnlineDot();
+
+  /* FIX P1-2: fallback se CDN non carica */
+  if(typeof Astronomy==='undefined'){
+    showCdnError();
+    /* Riprova automaticamente dopo 4s se CDN arriva in ritardo */
+    setTimeout(function(){
+      if(typeof Astronomy!=='undefined'){
+        location.reload();
+      }else{
+        showCdnError();
+      }
+    },4000);
+    return;
+  }
+
   var onboardingShown=runOnboarding();
   if(!onboardingShown){
     updateAstro();
@@ -1134,8 +1259,17 @@ function init(){
     if(d.getHours()<12)d.setDate(d.getDate()-1);
     activeDate=d;weatherLoaded=false;updateAstro();fetchWeather();
   });
-  document.getElementById('btnPrev').addEventListener('click',function(){activeDate.setDate(activeDate.getDate()-1);weatherLoaded=false;updateAstro();fetchWeather();});
-  document.getElementById('btnNext').addEventListener('click',function(){activeDate.setDate(activeDate.getDate()+1);weatherLoaded=false;updateAstro();fetchWeather();});
+  /* FIX P2: pulsanti prev/next con limiti */
+  document.getElementById('btnPrev').addEventListener('click',function(){
+    if(!canGoPrev()){toast('Puoi andare indietro di 1 notte al massimo.',2500);return;}
+    activeDate.setDate(activeDate.getDate()-1);
+    weatherLoaded=false;updateAstro();fetchWeather();
+  });
+  document.getElementById('btnNext').addEventListener('click',function(){
+    if(!canGoNext()){toast('Previsioni meteo disponibili solo per i prossimi 3 giorni.',2500);return;}
+    activeDate.setDate(activeDate.getDate()+1);
+    weatherLoaded=false;updateAstro();fetchWeather();
+  });
   var rp=document.getElementById('btnResetPerms');
   if(rp)rp.addEventListener('click',function(){if(confirm('Vuoi rivedere la schermata dei permessi?'))window.resetAstroAlertOnboarding();});
   setInterval(function(){updateAstro();},60*1000);
