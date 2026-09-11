@@ -454,6 +454,9 @@ var loc={lat:40.6947,lon:14.4803,elev:6,name:"Castellammare di Stabia"};
 var activeDate=(function(){var d=new Date();if(d.getHours()<12)d.setDate(d.getDate()-1);return d;})();
 var weatherLoaded=false;
 var activeFilter='all';
+var weatherFetchToken=0;
+var geocodeFetchToken=0;
+var navBusy=false;
 var currentWeatherContext={clouds:0,jetSpeed:80,jetAvailable:false,seeingQuality:1};
 var KM_PER_LY=9.460730472e12;
 var KM_PER_AU=149597870.7;
@@ -952,7 +955,7 @@ function openCelestialModal(key){
 var arState={stream:null,headingHandler:null,timer:null};
 function stopAR(){
   if(arState.stream){arState.stream.getTracks().forEach(function(t){t.stop();});arState.stream=null;}
-  if(arState.headingHandler){window.removeEventListener('deviceorientationabsolute',arState.headingHandler);window.removeEventListener('deviceorientation',arState.headingHandler);arState.headingHandler=null;}
+  if(arState.headingHandler){window.removeEventListener('deviceorientationabsolute',arState.headingHandler,true);window.removeEventListener('deviceorientation',arState.headingHandler,true);arState.headingHandler=null;}
   if(arState.timer){clearInterval(arState.timer);arState.timer=null;}
   var v=document.getElementById('arRoot');if(v)v.remove();
 }
@@ -1034,8 +1037,8 @@ function canGoNext(){return daysFromToday(activeDate) < 3;}
 function updateNavButtons(){
   var bp=document.getElementById('btnPrev');
   var bn=document.getElementById('btnNext');
-  if(bp){bp.disabled=!canGoPrev();}
-  if(bn){bn.disabled=!canGoNext();}
+  if(bp){bp.disabled=navBusy||!canGoPrev();}
+  if(bn){bn.disabled=navBusy||!canGoNext();}
 }
 function updateAstro(){
   if(typeof Astronomy==='undefined')return;
@@ -1201,11 +1204,14 @@ function fetchWeather(){
   var today=new Date();today.setHours(12,0,0,0);
   var dayOffset=Math.round((dateToUse-today)/86400000);
   var nocache=new Date().getTime();
+  var myToken=++weatherFetchToken;
+  navBusy=true;updateNavButtons();
   var url="https://api.open-meteo.com/v1/forecast?latitude="+loc.lat.toFixed(4)+"&longitude="+loc.lon.toFixed(4)
     +"&current=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,wind_speed_10m"
     +"&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,wind_speed_10m,wind_speed_850hPa,wind_speed_250hPa"
     +"&timezone=Europe%2FRome&forecast_days=4&_nc="+nocache;
   fetch(url).then(function(res){if(!res.ok)throw new Error();return res.json();}).then(function(data){
+    if(myToken!==weatherFetchToken)return;
     var curr=data.current||{},h=data.hourly||{};
     var hourOffset=dayOffset*24;
     var refIdx;
@@ -1276,11 +1282,14 @@ function fetchWeather(){
     else{seeingQuality=0;seeEl.innerHTML='<span class="tag no">Forte Jet Stream ('+wJet+' km/h) – 81x</span>';}
     currentWeatherContext.seeingQuality=seeingQuality;
     weatherLoaded=true;
+    navBusy=false;
     updateEyepieceAdvice();
     updateAstro();
   }).catch(function(){
+    if(myToken!==weatherFetchToken)return;
     document.getElementById('mSeeing').textContent="Dati meteo live non disponibili";
     weatherLoaded=true;
+    navBusy=false;
     updateEyepieceAdvice();
     updateAstro();
   });
@@ -1300,8 +1309,10 @@ function updateLocLabel(){
 function geocodeCity(query){
   var resEl=document.getElementById('locResults');
   resEl.innerHTML='<div class="loc-item">Ricerca coordinate in corso...</div>';
+  var myToken=++geocodeFetchToken;
   var url="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=4&language=it&format=json";
   fetch(url).then(function(r){return r.json();}).then(function(data){
+    if(myToken!==geocodeFetchToken)return;
     if(!data.results||!data.results.length){resEl.innerHTML='<div class="loc-item">Nessuna località trovata.</div>';return;}
     resEl.innerHTML=data.results.map(function(item,idx){
       var sub=[item.admin1,item.country].filter(Boolean).join(", ");
@@ -1319,13 +1330,16 @@ function geocodeCity(query){
         fetchWeather();
       });
     });
-  }).catch(function(){resEl.innerHTML='<div class="loc-item">Errore di connessione.</div>';});
+  }).catch(function(){
+    if(myToken!==geocodeFetchToken)return;
+    resEl.innerHTML='<div class="loc-item">Errore di connessione.</div>';
+  });
 }
 function acquireGps(){
   if(!navigator.geolocation)return;
   var btn=document.getElementById('btnGps');btn.textContent="Rilevamento...";
   navigator.geolocation.getCurrentPosition(function(pos){
-    loc.lat=pos.coords.latitude;loc.lon=pos.coords.longitude;loc.elev=pos.coords.altitude||6;
+    loc.lat=pos.coords.latitude;loc.lon=pos.coords.longitude;loc.elev=(typeof pos.coords.altitude==='number')?pos.coords.altitude:6;
     loc.name="Posizione GPS";
     updateLocLabel();
     btn.textContent="GPS Attivo";
@@ -1346,7 +1360,7 @@ function requestGeolocationPermission(){
     if(!navigator.geolocation){setPermState('geo','no');resolve(false);return;}
     navigator.geolocation.getCurrentPosition(
       function(pos){
-        loc.lat=pos.coords.latitude;loc.lon=pos.coords.longitude;loc.elev=pos.coords.altitude||6;
+        loc.lat=pos.coords.latitude;loc.lon=pos.coords.longitude;loc.elev=(typeof pos.coords.altitude==='number')?pos.coords.altitude:6;
         loc.name="Posizione GPS";
         updateLocLabel();
         setPermState('geo','ok');resolve(true);
@@ -1378,9 +1392,9 @@ function requestCameraPermission(){
   });
 }
 function shouldShowOnboarding(){
-  if(!window.isSecureContext)return true;
   var flagOk=safeGet('astroalert_onboarded')==='1';
   if(!flagOk)return true;
+  if(!window.isSecureContext)return false;
   if(!isAndroid()&&'Notification' in window&&Notification.permission==='default')return true;
   return false;
 }
