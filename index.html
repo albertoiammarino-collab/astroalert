@@ -103,7 +103,6 @@ header{border-bottom:2px solid var(--line);padding-bottom:var(--gap);margin-bott
 .pmag.mag-faint{color:#9c8248}
 .pmag.mag-faint .mag-value{font-weight:500;text-shadow:0 0 3px rgba(156,130,72,0.35)}
 
-/* METRIC LINES con auto-fit binary search */
 .metrics-block{display:flex;flex-direction:column;gap:8px;margin:10px 0 6px;font-family:var(--mono);line-height:1.35}
 .metric-line{display:flex;align-items:baseline;gap:8px;font-size:14px;min-width:0}
 .metric-k{color:var(--muted);flex:0 0 auto;white-space:nowrap;font-weight:500}
@@ -200,7 +199,7 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .moon-phase-caption{text-align:center;font-size:var(--fs-xs);color:var(--muted);margin-bottom:12px;font-family:var(--mono)}
 
 /* ============================================================
-   AR VIEW
+   AR VIEW v3.1
    ============================================================ */
 .arview{position:fixed;inset:0;z-index:60;background:#000;overflow:hidden}
 .arview video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -208,7 +207,6 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .arview .armsg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;font-size:var(--fs-md);padding:12px 24px;line-height:1.6;background:rgba(0,0,0,0.55);border-radius:8px;max-width:80vw;z-index:3}
 .arview .arlabel{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);font-size:16px;text-shadow:0 2px 6px rgba(0,0,0,0.95);font-weight:700;z-index:3;padding:0 20px}
 
-/* Cerchio di ricerca: giallo pulsante → verde fisso quando agganciato */
 .arview .search-circle{
   position:absolute;width:150px;height:150px;
   border:2px dashed rgba(242,184,75,0.85);
@@ -228,7 +226,6 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .arview .search-circle::after{
   top:50%;left:18%;height:1px;width:64%;transform:translateY(-50%);
 }
-/* STATO LOCKED: cerchio VERDE SOLIDO con glow quando centri il bersaglio */
 .arview .search-circle.locked{
   border-style:solid;
   border-color:var(--green);
@@ -253,6 +250,20 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
   text-shadow:0 1px 3px rgba(0,0,0,0.9);
   pointer-events:none;z-index:3;
   border:1px solid rgba(242,184,75,0.4);
+}
+/* Blocco landscape durante l'AR: il calcolo del pitch con beta non è
+   valido quando il telefono è ruotato, l'utente deve tornare in portrait */
+@media (orientation: landscape) {
+  .arview::after{
+    content:"📱 Ruota il telefono in verticale per usare l'AR";
+    position:absolute;inset:0;
+    background:rgba(7,12,22,0.97);
+    color:var(--amber);
+    font-size:17px;font-family:var(--mono);font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    padding:32px;text-align:center;
+    z-index:999;letter-spacing:0.02em;line-height:1.5;
+  }
 }
 
 footer{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:var(--fs-xs);color:var(--muted-2);font-family:var(--mono);line-height:1.6}
@@ -892,15 +903,14 @@ function openCelestialModal(key){
 }
 
 /* ============================================================
-   AR VIEW — v3 con declinazione magnetica + FOV reale + lock 6° + verde
+   AR VIEW v3.1 — fix errore combinato cos(alt) + landscape + decl 3.4
    ============================================================ */
 var arState={stream:null,headingHandler:null,timer:null};
 var phonePitch=null;
 var phoneHeading=null;
 
-/* Declinazione magnetica per l'Italia (Nord geografico - Nord magnetico).
-   Varia da +2° (Alpi) a +4° (Sicilia). 3° è il valore medio. */
-var MAGNETIC_DECLINATION = 3.0;
+/* Declinazione magnetica 2026 per Castellammare di Stabia (~+3.4° Est) */
+var MAGNETIC_DECLINATION = 3.4;
 
 function stopAR(){
   if(arState.stream){arState.stream.getTracks().forEach(function(t){t.stop();});arState.stream=null;}
@@ -926,7 +936,6 @@ function startAR(key){
   phoneHeading=null;
 
   function onOrientation(e){
-    /* Heading con correzione declinazione magnetica */
     if(e.webkitCompassHeading!==undefined && e.webkitCompassHeading!==null){
       phoneHeading=(e.webkitCompassHeading + MAGNETIC_DECLINATION + 360) % 360;
     } else if(e.alpha!==null && e.alpha!==undefined){
@@ -934,7 +943,6 @@ function startAR(key){
         phoneHeading=((360-e.alpha) + MAGNETIC_DECLINATION + 360) % 360;
       }
     }
-    /* Pitch (altitudine puntamento) — formula corretta: alt = |beta| - 90 */
     if(typeof e.beta==='number' && !isNaN(e.beta)){
       var p = Math.abs(e.beta) - 90;
       if(p<-90) p=-90;
@@ -968,9 +976,8 @@ function startAR(key){
       window.addEventListener('deviceorientationabsolute',onOrientation,true);
       window.addEventListener('deviceorientation',onOrientation,true);
 
-      /* FOV reale Samsung S25 Ultra in verticale (stima): 65° x 50° */
       var HFOV=65, VFOV=50, ticks=0;
-      var LOCK_TOL=6;   /* tolleranza stretta per lock: 6° di errore combinato */
+      var LOCK_TOL=6;
       var body=(key==="Moon")?A.Body.Moon:A.Body[key];
       var targetName=(key==="Moon")?"Luna":PLANET_DATA[key].name;
 
@@ -1001,12 +1008,18 @@ function startAR(key){
         var diffAlt=hor.altitude-refAlt;
         var HALF_H=HFOV/2, HALF_V=VFOV/2;
 
-        /* Errore combinato azimut+altitudine (distanza angolare approssimata) */
-        var errTotal=Math.sqrt(diffAz*diffAz + diffAlt*diffAlt);
-        /* Lock STRETTO: solo se errore combinato < 6° */
+        /* FIX: scaling azimut per cos(alt).
+           Vicino allo zenit 1° di azimut copre una distanza angolare reale
+           minore di 1° di altitudine. Senza questo scaling, i bersagli alti
+           non si agganciavano mai con LOCK_TOL stretto. */
+        var cosAlt=Math.cos(hor.altitude*Math.PI/180);
+        if(cosAlt<0.05)cosAlt=0.05;   /* clamp anti-singolarità allo zenit */
+        var diffAzScaled=diffAz*cosAlt;
+        var errTotal=Math.sqrt(diffAzScaled*diffAzScaled + diffAlt*diffAlt);
         var inFov=(errTotal < LOCK_TOL);
 
-        var rawX=50+(diffAz/HALF_H)*45;
+        /* Posizione cerchio: azimut scalato + clamp ai bordi */
+        var rawX=50+(diffAzScaled/HALF_H)*45;
         var rawY=50-(diffAlt/HALF_V)*45;
         var cx=Math.max(12,Math.min(88,rawX));
         var cy=Math.max(14,Math.min(86,rawY));
