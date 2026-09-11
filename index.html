@@ -103,14 +103,12 @@ header{border-bottom:2px solid var(--line);padding-bottom:var(--gap);margin-bott
 .pmag.mag-faint{color:#9c8248}
 .pmag.mag-faint .mag-value{font-weight:500;text-shadow:0 0 3px rgba(156,130,72,0.35)}
 
-/* METRIC LINES */
 .metrics-block{display:flex;flex-direction:column;gap:8px;margin:10px 0 6px;font-family:var(--mono);line-height:1.35}
 .metric-line{display:flex;align-items:baseline;gap:8px;font-size:14px;min-width:0}
 .metric-k{color:var(--muted);flex:0 0 auto;white-space:nowrap;font-weight:500}
 .metric-v{color:var(--text);font-weight:800;flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:clip;letter-spacing:-0.01em}
 .metric-n{color:var(--muted-2);font-size:0.9em;flex:0 0 auto;white-space:nowrap;margin-left:auto;text-align:right}
 
-/* MOON CARD */
 .moon-card{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin:var(--gap) 0;cursor:pointer}
 .moon-card-top{display:flex;align-items:flex-start;gap:10px}
 .moon-svg{flex:0 0 auto}
@@ -122,7 +120,6 @@ header{border-bottom:2px solid var(--line);padding-bottom:var(--gap);margin-bott
 .moon-card-sub{margin-top:10px;padding-top:8px;border-top:1px solid rgba(28,45,70,0.6);font-size:var(--fs-sm);color:var(--muted);font-family:var(--mono);line-height:1.4}
 @media (max-width:360px){.moon-svg svg{width:38px;height:38px}}
 
-/* PIANETI / STELLE / DEEP SKY */
 .planet-box{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:var(--pad-y) var(--pad-x);margin-bottom:var(--gap);cursor:pointer}
 .planet-box.dim{opacity:0.65}
 .prow1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:var(--gap);flex-wrap:wrap}
@@ -201,14 +198,12 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .moon-phase-svg-wrap svg{width:min(170px,55vw);height:min(170px,55vw)}
 .moon-phase-caption{text-align:center;font-size:var(--fs-xs);color:var(--muted);margin-bottom:12px;font-family:var(--mono)}
 
-/* AR VIEW */
 .arview{position:fixed;inset:0;z-index:60;background:#000;overflow:hidden}
 .arview video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .arview .arclose{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;z-index:5;line-height:1;display:flex;align-items:center;justify-content:center}
 .arview .armsg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;font-size:var(--fs-md);padding:12px 24px;line-height:1.6;background:rgba(0,0,0,0.55);border-radius:8px;max-width:80vw;z-index:3}
 .arview .arlabel{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);font-size:16px;text-shadow:0 2px 6px rgba(0,0,0,0.95);font-weight:700;z-index:3;padding:0 20px}
 
-/* SEARCH CIRCLE: pulse quando cerca, locked quando agganciato */
 .arview .search-circle{
   position:absolute;width:150px;height:150px;
   border:2px dashed rgba(242,184,75,0.8);
@@ -465,11 +460,10 @@ function magBrightnessClass(mag){if(mag<=-2)return"mag-super";if(mag<=0)return"m
 function magHTML(mag){return '<span class="mag-label">Mag</span> <span class="mag-value">'+Number(mag).toFixed(1)+'</span>';}
 function magSpan(mag){return '<span class="pmag '+magBrightnessClass(mag)+'">'+magHTML(mag)+'</span>';}
 
-/* ============ AUTO-FIT metriche ============ */
+/* AUTO-FIT metriche */
 var METRIC_MIN_PX = 11;
 var METRIC_MAX_PX = 20;
 var _fitScheduled = false;
-
 function lineOverflows(line){
   var v = line.querySelector('.metric-v');
   if(!v) return false;
@@ -507,7 +501,7 @@ var _resizeTimer = null;
 window.addEventListener('resize', function(){ if(_resizeTimer) clearTimeout(_resizeTimer); _resizeTimer = setTimeout(scheduleFitMetrics, 120); });
 window.addEventListener('orientationchange', function(){ if(_resizeTimer) clearTimeout(_resizeTimer); _resizeTimer = setTimeout(scheduleFitMetrics, 250); });
 
-/* ============ FORMATTAZIONE ============ */
+/* FORMATTAZIONE */
 function formatDistanceLines(km, isFarDeepSky, fixedLy){
   if(isFarDeepSky || (typeof fixedLy === 'number' && fixedLy > 0.05)){
     var lyVal = fixedLy || (km/KM_PER_LY);
@@ -890,11 +884,14 @@ function openCelestialModal(key){
 }
 
 /* ============================================================
-   AR VIEW con cerchio di ricerca + FIX pitch corretto
+   AR VIEW — FIX DEFINITIVO: alt = |beta| - 90
+   beta=0   → telefono piatto schermo in su → fotocamera punta al NADIR  (-90°)
+   beta=90  → telefono verticale           → fotocamera punta all'ORIZZONTE (0°)
+   beta=180 → telefono piatto schermo giù  → fotocamera punta allo ZENIT (+90°)
    ============================================================ */
 var arState={stream:null,headingHandler:null,timer:null};
-var phonePitch=null;   /* altitudine reale del puntamento del telefono */
-var phoneHeading=null; /* azimut reale */
+var phonePitch=null;
+var phoneHeading=null;
 
 function stopAR(){
   if(arState.stream){arState.stream.getTracks().forEach(function(t){t.stop();});arState.stream=null;}
@@ -916,7 +913,6 @@ function startAR(key){
   document.body.appendChild(root);
   document.getElementById('arClose').addEventListener('click',stopAR);
 
-  /* Reset stato sensori */
   phonePitch=null;
   phoneHeading=null;
 
@@ -929,12 +925,12 @@ function startAR(key){
         phoneHeading=360-e.alpha;
       }
     }
-    /* Pitch (altitudine) — beta: 0=flat screen-up, 90=verticale, 180=flat screen-down */
+    /* Pitch (altitudine puntamento)
+       FORMULA CORRETTA: alt = |beta| - 90 */
     if(typeof e.beta==='number' && !isNaN(e.beta)){
-      /* altitudine = 90 - |beta|  →  beta=0 → alt=90 (zenit), beta=90 → alt=0 (orizzonte), beta=180 → alt=-90 (nadir) */
-      var p=90-Math.abs(e.beta);
-      if(p<-90)p=-90;
-      if(p>90)p=90;
+      var p = Math.abs(e.beta) - 90;
+      if(p<-90) p=-90;
+      if(p>90)  p=90;
       phonePitch=p;
     }
   }
@@ -953,11 +949,9 @@ function startAR(key){
       root.insertBefore(video,root.firstChild);
       video.play().catch(function(){});
 
-      /* Label in basso con nome del bersaglio */
       var label=document.createElement('div');label.className='arlabel';
       root.appendChild(label);
 
-      /* Elementi cerchio + freccia */
       var searchEl=document.getElementById('arSearch');
       var arrowEl=document.getElementById('arArrow');
       if(searchEl)searchEl.style.display='block';
@@ -977,7 +971,6 @@ function startAR(key){
         var eq=A.Equator(body,now,obs,true,true);
         var hor=A.Horizon(now,obs,eq.ra,eq.dec,'normal');
 
-        /* Bussola non pronta */
         if(phoneHeading===null){
           if(ticks>8)setMsg('In attesa della bussola... Calibra muovendo il telefono a forma di 8.');
           if(searchEl)searchEl.style.display='none';
@@ -985,8 +978,6 @@ function startAR(key){
           label.innerHTML='';
           return;
         }
-
-        /* Bersaglio sotto orizzonte */
         if(hor.altitude<0){
           setMsg('<b>'+targetName+'</b> è sotto l\'orizzonte.');
           if(searchEl)searchEl.style.display='none';
@@ -995,16 +986,12 @@ function startAR(key){
           return;
         }
 
-        /* Differenze direzionali */
         var diffAz=((hor.azimuth-phoneHeading+540)%360)-180;
-        var refAlt=(phonePitch!==null)?phonePitch:45;
+        var refAlt=(phonePitch!==null)?phonePitch:0;
         var diffAlt=hor.altitude-refAlt;
         var HALF_H=HFOV/2, HALF_V=VFOV/2;
 
-        /* In campo visivo? */
         var inFov=(Math.abs(diffAz)<HALF_H && Math.abs(diffAlt)<HALF_V);
-
-        /* Posizione del cerchio in % dello schermo */
         var rawX=50+(diffAz/HALF_H)*45;
         var rawY=50-(diffAlt/HALF_V)*45;
         var cx=Math.max(12,Math.min(88,rawX));
@@ -1018,7 +1005,6 @@ function startAR(key){
           else searchEl.classList.remove('locked');
         }
 
-        /* Feedback testuale */
         var msgEl=document.getElementById('arMsg');
         if(inFov){
           if(msgEl)msgEl.style.display='none';
