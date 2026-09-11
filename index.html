@@ -103,6 +103,7 @@ header{border-bottom:2px solid var(--line);padding-bottom:var(--gap);margin-bott
 .pmag.mag-faint{color:#9c8248}
 .pmag.mag-faint .mag-value{font-weight:500;text-shadow:0 0 3px rgba(156,130,72,0.35)}
 
+/* METRIC LINES con auto-fit binary search */
 .metrics-block{display:flex;flex-direction:column;gap:8px;margin:10px 0 6px;font-family:var(--mono);line-height:1.35}
 .metric-line{display:flex;align-items:baseline;gap:8px;font-size:14px;min-width:0}
 .metric-k{color:var(--muted);flex:0 0 auto;white-space:nowrap;font-weight:500}
@@ -198,15 +199,19 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .moon-phase-svg-wrap svg{width:min(170px,55vw);height:min(170px,55vw)}
 .moon-phase-caption{text-align:center;font-size:var(--fs-xs);color:var(--muted);margin-bottom:12px;font-family:var(--mono)}
 
+/* ============================================================
+   AR VIEW
+   ============================================================ */
 .arview{position:fixed;inset:0;z-index:60;background:#000;overflow:hidden}
 .arview video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .arview .arclose{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;z-index:5;line-height:1;display:flex;align-items:center;justify-content:center}
 .arview .armsg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;font-size:var(--fs-md);padding:12px 24px;line-height:1.6;background:rgba(0,0,0,0.55);border-radius:8px;max-width:80vw;z-index:3}
 .arview .arlabel{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);font-size:16px;text-shadow:0 2px 6px rgba(0,0,0,0.95);font-weight:700;z-index:3;padding:0 20px}
 
+/* Cerchio di ricerca: giallo pulsante → verde fisso quando agganciato */
 .arview .search-circle{
   position:absolute;width:150px;height:150px;
-  border:2px dashed rgba(242,184,75,0.8);
+  border:2px dashed rgba(242,184,75,0.85);
   border-radius:50%;top:50%;left:50%;
   transform:translate(-50%,-50%);
   pointer-events:none;z-index:2;
@@ -223,14 +228,18 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .arview .search-circle::after{
   top:50%;left:18%;height:1px;width:64%;transform:translateY(-50%);
 }
+/* STATO LOCKED: cerchio VERDE SOLIDO con glow quando centri il bersaglio */
 .arview .search-circle.locked{
   border-style:solid;
-  border-color:var(--amber);
-  box-shadow:0 0 28px rgba(242,184,75,0.85),inset 0 0 20px rgba(242,184,75,0.25);
+  border-color:var(--green);
+  box-shadow:0 0 32px rgba(46,204,113,0.95),inset 0 0 22px rgba(46,204,113,0.35);
   animation:none;
 }
 .arview .search-circle.locked::before,
-.arview .search-circle.locked::after{background:var(--amber);box-shadow:0 0 4px var(--amber)}
+.arview .search-circle.locked::after{
+  background:var(--green);
+  box-shadow:0 0 5px var(--green);
+}
 @keyframes arPulse{
   0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.75}
   50%{transform:translate(-50%,-50%) scale(1.12);opacity:1}
@@ -460,7 +469,7 @@ function magBrightnessClass(mag){if(mag<=-2)return"mag-super";if(mag<=0)return"m
 function magHTML(mag){return '<span class="mag-label">Mag</span> <span class="mag-value">'+Number(mag).toFixed(1)+'</span>';}
 function magSpan(mag){return '<span class="pmag '+magBrightnessClass(mag)+'">'+magHTML(mag)+'</span>';}
 
-/* AUTO-FIT metriche */
+/* AUTO-FIT metriche con binary search */
 var METRIC_MIN_PX = 11;
 var METRIC_MAX_PX = 20;
 var _fitScheduled = false;
@@ -501,7 +510,6 @@ var _resizeTimer = null;
 window.addEventListener('resize', function(){ if(_resizeTimer) clearTimeout(_resizeTimer); _resizeTimer = setTimeout(scheduleFitMetrics, 120); });
 window.addEventListener('orientationchange', function(){ if(_resizeTimer) clearTimeout(_resizeTimer); _resizeTimer = setTimeout(scheduleFitMetrics, 250); });
 
-/* FORMATTAZIONE */
 function formatDistanceLines(km, isFarDeepSky, fixedLy){
   if(isFarDeepSky || (typeof fixedLy === 'number' && fixedLy > 0.05)){
     var lyVal = fixedLy || (km/KM_PER_LY);
@@ -884,14 +892,15 @@ function openCelestialModal(key){
 }
 
 /* ============================================================
-   AR VIEW — FIX DEFINITIVO: alt = |beta| - 90
-   beta=0   → telefono piatto schermo in su → fotocamera punta al NADIR  (-90°)
-   beta=90  → telefono verticale           → fotocamera punta all'ORIZZONTE (0°)
-   beta=180 → telefono piatto schermo giù  → fotocamera punta allo ZENIT (+90°)
+   AR VIEW — v3 con declinazione magnetica + FOV reale + lock 6° + verde
    ============================================================ */
 var arState={stream:null,headingHandler:null,timer:null};
 var phonePitch=null;
 var phoneHeading=null;
+
+/* Declinazione magnetica per l'Italia (Nord geografico - Nord magnetico).
+   Varia da +2° (Alpi) a +4° (Sicilia). 3° è il valore medio. */
+var MAGNETIC_DECLINATION = 3.0;
 
 function stopAR(){
   if(arState.stream){arState.stream.getTracks().forEach(function(t){t.stop();});arState.stream=null;}
@@ -917,16 +926,15 @@ function startAR(key){
   phoneHeading=null;
 
   function onOrientation(e){
-    /* Heading (azimut) */
+    /* Heading con correzione declinazione magnetica */
     if(e.webkitCompassHeading!==undefined && e.webkitCompassHeading!==null){
-      phoneHeading=e.webkitCompassHeading;
+      phoneHeading=(e.webkitCompassHeading + MAGNETIC_DECLINATION + 360) % 360;
     } else if(e.alpha!==null && e.alpha!==undefined){
       if(phoneHeading===null || e.absolute){
-        phoneHeading=360-e.alpha;
+        phoneHeading=((360-e.alpha) + MAGNETIC_DECLINATION + 360) % 360;
       }
     }
-    /* Pitch (altitudine puntamento)
-       FORMULA CORRETTA: alt = |beta| - 90 */
+    /* Pitch (altitudine puntamento) — formula corretta: alt = |beta| - 90 */
     if(typeof e.beta==='number' && !isNaN(e.beta)){
       var p = Math.abs(e.beta) - 90;
       if(p<-90) p=-90;
@@ -960,7 +968,9 @@ function startAR(key){
       window.addEventListener('deviceorientationabsolute',onOrientation,true);
       window.addEventListener('deviceorientation',onOrientation,true);
 
-      var HFOV=62,VFOV=46,ticks=0;
+      /* FOV reale Samsung S25 Ultra in verticale (stima): 65° x 50° */
+      var HFOV=65, VFOV=50, ticks=0;
+      var LOCK_TOL=6;   /* tolleranza stretta per lock: 6° di errore combinato */
       var body=(key==="Moon")?A.Body.Moon:A.Body[key];
       var targetName=(key==="Moon")?"Luna":PLANET_DATA[key].name;
 
@@ -991,7 +1001,11 @@ function startAR(key){
         var diffAlt=hor.altitude-refAlt;
         var HALF_H=HFOV/2, HALF_V=VFOV/2;
 
-        var inFov=(Math.abs(diffAz)<HALF_H && Math.abs(diffAlt)<HALF_V);
+        /* Errore combinato azimut+altitudine (distanza angolare approssimata) */
+        var errTotal=Math.sqrt(diffAz*diffAz + diffAlt*diffAlt);
+        /* Lock STRETTO: solo se errore combinato < 6° */
+        var inFov=(errTotal < LOCK_TOL);
+
         var rawX=50+(diffAz/HALF_H)*45;
         var rawY=50-(diffAlt/HALF_V)*45;
         var cx=Math.max(12,Math.min(88,rawX));
@@ -1009,12 +1023,14 @@ function startAR(key){
         if(inFov){
           if(msgEl)msgEl.style.display='none';
           if(arrowEl)arrowEl.style.display='none';
-          label.innerHTML=targetName+' · '+Math.round(hor.altitude)+'°';
+          label.innerHTML=targetName+' · '+Math.round(hor.altitude)+'°  <span style="color:var(--green);font-size:13px">✓ agganciato ±'+Math.round(errTotal)+'°</span>';
         } else {
           if(msgEl)msgEl.style.display='none';
           var hints=[];
           if(Math.abs(diffAz)>=HALF_H)hints.push(diffAz>0?'Gira a destra →':'← Gira a sinistra');
+          else if(Math.abs(diffAz)>=LOCK_TOL)hints.push(diffAz>0?'→ destra':'← sinistra');
           if(Math.abs(diffAlt)>=HALF_V)hints.push(diffAlt>0?'↑ Alza':'↓ Abbassa');
+          else if(Math.abs(diffAlt)>=LOCK_TOL)hints.push(diffAlt>0?'↑ alza':'↓ abbassa');
           if(arrowEl){
             arrowEl.style.display=hints.length?'block':'none';
             arrowEl.textContent=hints.join('   ');
