@@ -232,7 +232,6 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .globe-tooltip b { color: #f2b84b; }
 .globe-tooltip .tooltip-desc { color: #8ca0ba; }
 
-/* Overlay: bussola selenografica + coordinate vista */
 .globe-compass-overlay{
   position:absolute;top:10px;left:10px;z-index:5;
   background:rgba(7,12,22,0.78);
@@ -257,7 +256,6 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
   text-align:center;letter-spacing:0.02em;
 }
 
-/* Overlay: pulsanti controllo */
 .globe-controls-overlay{
   position:absolute;bottom:10px;right:10px;z-index:5;
   display:flex;flex-direction:column;gap:6px;
@@ -285,10 +283,6 @@ details.collapse > div{padding:10px var(--pad-x);border-top:1px solid var(--line
 .moon-map-info .info-name{font-size:var(--fs-md);font-weight:700;color:var(--text);line-height:1.3}
 .moon-map-info .info-line{color:var(--muted);margin-top:3px}
 .moon-map-info .info-coord{font-family:var(--mono);font-size:var(--fs-xs);color:var(--muted-2);margin-top:6px}
-
-.api-live-block{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-.api-live-block .api-status{font-family:var(--mono);font-size:var(--fs-xs);color:var(--muted-2);margin-top:8px;line-height:1.4}
-.api-live-block .api-status.warn{color:var(--amber)}
 
 /* ===== AR ===== */
 .arview{position:fixed;inset:0;z-index:60;background:#000;overflow:hidden}
@@ -352,13 +346,6 @@ footer{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-si
 .point-card .point-name{font-size:var(--fs-2xl);font-weight:700;margin:6px 0;line-height:1.2}
 .point-card .point-main{font-size:var(--fs-md);line-height:1.5}
 .point-card .point-meta{font-size:var(--fs-sm);color:var(--muted);margin-top:6px;line-height:1.45}
-
-.apikey-modal{position:fixed;inset:0;background:rgba(4,8,14,0.85);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
-.apikey-modal.show{display:flex}
-.apikey-inner{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;max-width:400px;width:100%}
-.apikey-inner h3{color:var(--amber);margin-bottom:8px;font-size:var(--fs-lg)}
-.apikey-inner p{font-size:var(--fs-sm);color:var(--muted);margin-bottom:12px;line-height:1.5}
-.apikey-inner input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:6px;font-size:var(--fs-base);margin-bottom:10px;font-family:var(--mono)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 </head>
@@ -447,19 +434,6 @@ footer{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-si
     <div class="ptrack" id="moonTrack"></div>
     <div class="prow2" id="moonTimesRow"><span>sorge --:--</span><span>max --°</span><span>tramonta --:--</span></div>
     <div class="compact-metric" id="moonTransitLine" style="margin-top:6px;"></div>
-
-    <div class="api-live-block">
-      <div class="label" style="margin-bottom:6px;">DATI LIVE DAL TUO GPS (IPGeolocation.io)</div>
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:6px;font-size:var(--fs-sm)">
-        <div><span class="label">Fase:</span><span class="val" id="apiMoonPhase">--</span></div>
-        <div><span class="label">Illuminazione:</span><span class="val" id="apiMoonIllum">--%</span></div>
-        <div><span class="label">Azimut:</span><span class="val" id="apiMoonAz">--°</span></div>
-        <div><span class="label">Altitudine:</span><span class="val" id="apiMoonAlt">--°</span></div>
-        <div><span class="label">Distanza:</span><span class="val" id="apiMoonDist">-- km</span></div>
-        <div><span class="label">Sorge / Tramonta:</span><span class="val" id="apiMoonRiseSet">-- / --</span></div>
-      </div>
-      <div class="api-status" id="apiMoonStatus">In attesa della API key...</div>
-    </div>
 
     <div class="verdict" style="margin-top: 12px;">
       <b>Consiglio C8 SE per la Luna:</b>
@@ -591,23 +565,9 @@ footer{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-si
 
 <div id="modalRoot"></div>
 
-<div class="apikey-modal" id="apiKeyModal">
-  <div class="apikey-inner">
-    <h3>🔑 API Key Luna</h3>
-    <p>Inserisci la tua API key di <b>IPGeolocation.io</b> per dati lunari live basati sul tuo GPS. Il piano Free include 1.000 richieste/mese.</p>
-    <input type="text" id="apiKeyInput" placeholder="Incolla qui la tua API key...">
-    <div style="display:flex;gap:8px">
-      <button type="button" class="btn-ui" id="apiKeySave" style="flex:1;border-color:var(--green);color:var(--green)">Salva</button>
-      <button type="button" class="btn-ui" id="apiKeyCancel" style="flex:1">Annulla</button>
-    </div>
-    <div class="note" style="margin-top:10px;font-size:var(--fs-xs)">Registrati gratis su <a href="https://ipgeolocation.io/signup" target="_blank" rel="noopener">ipgeolocation.io/signup</a> → copia la key dalla dashboard.</div>
-  </div>
-</div>
-
 <footer>
-  Effemeridi: Astronomy Engine (VSOP87). Meteo: Open-Meteo. Luna live: IPGeolocation.io. Globo 3D: globe.gl + NASA LRO.<br>
-  <button type="button" class="btn-ui" id="btnApiKey" style="margin-top:8px;">🔑 Configura API Luna</button>
-  <button type="button" class="btn-ui" id="btnResetPerms" style="margin-top:8px;margin-left:6px;">Ripeti permessi</button>
+  Effemeridi: Astronomy Engine (VSOP87). Meteo: Open-Meteo. Globo 3D: globe.gl + NASA LRO.<br>
+  <button type="button" class="btn-ui" id="btnResetPerms" style="margin-top:8px;">Ripeti permessi</button>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.34.0/dist/globe.gl.min.js"></script>
@@ -642,7 +602,6 @@ var arCalibAlt = parseFloat(safeGet('astroalert_ar_calib_alt') || '0') || 0;
 var MAGNETIC_DECLINATION = 3.4;
 (function(){var c = safeGet('astroalert_decl'); if(c !== null){var v=parseFloat(c); if(isFinite(v)) MAGNETIC_DECLINATION = v;}})();
 
-var MOON_API_KEY = safeGet('astroalert_ipgeo_key') || '';
 var activeRadarCleanup = null;
 
 function compassDir(az){var i=Math.round(az/22.5)%16;if(i<0)i+=16;return COMPASS[i];}
@@ -1730,61 +1689,35 @@ function renderCratersAndMaria(){
 
 /* ============================================================
    GLOBO 3D LUNARE — v5
-   - Nessuna rotazione automatica (opzionale con pulsante)
-   - Bussola selenografica overlay
-   - Pulsanti zoom + reset
-   - Punti visibili e cliccabili
    ============================================================ */
 var moonGlobeInstance = null;
 var _moonGlobeFilter = 'all';
 var _moonGlobeItems = [];
 var _moonGlobeViewPOV = {lat:0, lng:0, altitude:2.2};
-var _moonGlobeAutoRotate = false; /* default: OFF */
+var _moonGlobeAutoRotate = false;
 
 function buildMoonGlobeData(){
   var items = [];
   LUNAR_LANDING_SITES.forEach(function(s){
-    items.push({
-      type: 'landing', name: s.name, lat: s.lat, lon: s.lon,
-      color: '#f2b84b', size: 1.1,
-      subtitle: s.mission,
-      desc: s.desc + ' (' + s.year + ')'
-    });
+    items.push({type:'landing',name:s.name,lat:s.lat,lon:s.lon,color:'#f2b84b',size:1.1,subtitle:s.mission,desc:s.desc+' ('+s.year+')'});
   });
   LUNAR_CRATERS.forEach(function(c){
-    items.push({
-      type: 'crater', name: c.name, lat: c.lat, lon: c.lon,
-      color: '#51a0d5', size: 0.9,
-      subtitle: 'Cratere · Ø ' + c.diameter + ' km',
-      desc: c.desc
-    });
+    items.push({type:'crater',name:c.name,lat:c.lat,lon:c.lon,color:'#51a0d5',size:0.9,subtitle:'Cratere · Ø '+c.diameter+' km',desc:c.desc});
   });
   LUNAR_MARIA.forEach(function(m){
-    items.push({
-      type: 'maria', name: m.nameIt, lat: m.lat, lon: m.lon,
-      color: '#2ecc71', size: 1.3,
-      subtitle: 'Mare · ' + m.name,
-      desc: m.desc
-    });
+    items.push({type:'maria',name:m.nameIt,lat:m.lat,lon:m.lon,color:'#2ecc71',size:1.3,subtitle:'Mare · '+m.name,desc:m.desc});
   });
   LUNAR_MOUNTAINS.forEach(function(m){
-    items.push({
-      type: 'mountain', name: m.nameIt, lat: m.lat, lon: m.lon,
-      color: '#e74c3c', size: 1.0,
-      subtitle: 'Catena montuosa · ' + m.name,
-      desc: m.desc + ' (' + m.length + ' km)'
-    });
+    items.push({type:'mountain',name:m.nameIt,lat:m.lat,lon:m.lon,color:'#e74c3c',size:1.0,subtitle:'Catena montuosa · '+m.name,desc:m.desc+' ('+m.length+' km)'});
   });
   return items;
 }
 
-/* Aggiorna la bussola overlay con la posizione corrente della vista */
 function updateGlobeCompass(){
   var coordEl = document.getElementById('globeCompassCoords');
   if(!coordEl) return;
   var lat = Math.round(_moonGlobeViewPOV.lat);
   var lon = Math.round(_moonGlobeViewPOV.lng);
-  /* Normalizza long in [-180, 180] per mostrare E/O correttamente */
   var lonTxt;
   if(lon === 0) lonTxt = "0°";
   else if(lon > 0) lonTxt = "+" + lon + "°";
@@ -1799,7 +1732,6 @@ function initMoonGlobe(){
 
   _moonGlobeItems = buildMoonGlobeData();
 
-  /* Bind filtri una volta sola */
   if(!document.body.dataset.moonGlobeFiltersBound){
     document.body.dataset.moonGlobeFiltersBound = '1';
     document.addEventListener('click', function(e){
@@ -1813,7 +1745,6 @@ function initMoonGlobe(){
     }, false);
   }
 
-  /* Bind pulsanti controllo — una volta sola */
   if(!document.body.dataset.moonGlobeControlsBound){
     document.body.dataset.moonGlobeControlsBound = '1';
 
@@ -1842,7 +1773,6 @@ function initMoonGlobe(){
         _moonGlobeAutoRotate = !_moonGlobeAutoRotate;
         var controls = moonGlobeInstance.controls();
         controls.autoRotate = _moonGlobeAutoRotate;
-        /* Velocità molto lenta */
         controls.autoRotateSpeed = 0.08;
         if(_moonGlobeAutoRotate){
           btnAuto.classList.add('playing');
@@ -1858,7 +1788,6 @@ function initMoonGlobe(){
     }, false);
   }
 
-  /* ==== CREAZIONE GLOBO 3D ==== */
   try {
     moonGlobeInstance = new Globe(container)
       .globeImageUrl('https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/moon_1024.jpg')
@@ -1872,7 +1801,6 @@ function initMoonGlobe(){
     return;
   }
 
-  /* ==== ILLUMINAZIONE ==== */
   try{
     if(typeof THREE !== 'undefined'){
       var scene = moonGlobeInstance.scene();
@@ -1887,11 +1815,10 @@ function initMoonGlobe(){
     }
   }catch(e){ console.log('[MoonGlobe] Luce non aggiunta:', e); }
 
-  /* ==== CONTROLLI ==== */
   try {
     var controls = moonGlobeInstance.controls();
-    controls.autoRotate = _moonGlobeAutoRotate; /* OFF di default */
-    controls.autoRotateSpeed = 0.08;            /* molto lento se attivato */
+    controls.autoRotate = _moonGlobeAutoRotate;
+    controls.autoRotateSpeed = 0.08;
     controls.enableZoom = true;
     controls.enablePan = false;
     controls.enableDamping = true;
@@ -1899,7 +1826,6 @@ function initMoonGlobe(){
     controls.minDistance = 150;
     controls.maxDistance = 800;
 
-    /* Traccia il movimento della camera per aggiornare la bussola */
     var compassUpdateScheduled = false;
     controls.addEventListener('change', function(){
       if(compassUpdateScheduled) return;
@@ -1917,17 +1843,14 @@ function initMoonGlobe(){
     });
   }catch(e){ console.log('[MoonGlobe] Controls error', e); }
 
-  /* Vista iniziale centrata sul lato visibile dalla Terra */
   try {
     moonGlobeInstance.pointOfView({ lat: 0, lng: 0, altitude: 2.2 }, 0);
     _moonGlobeViewPOV = { lat:0, lng:0, altitude:2.2 };
     updateGlobeCompass();
   }catch(e){}
 
-  /* Aggiorna i punti dopo che la sfera è pronta */
   setTimeout(function(){
     updateMoonGlobePoints();
-    /* Aggiorna bussola dopo il primo frame */
     try {
       var pov = moonGlobeInstance.pointOfView();
       _moonGlobeViewPOV.lat = pov.lat || 0;
@@ -1970,7 +1893,6 @@ function updateMoonGlobePoints(){
     .onPointClick(function(d){
       showMoonGlobeInfo(d);
       toast(d.name + ' · ' + d.subtitle, 3000);
-      /* Anima la vista verso il punto toccato */
       try {
         moonGlobeInstance.pointOfView({ lat: d.lat, lng: d.lon, altitude: 1.6 }, 700);
       } catch(e) {}
@@ -1988,50 +1910,6 @@ function showMoonGlobeInfo(item){
     + '<div class="info-line">' + escapeHtml(item.subtitle) + '</div>'
     + '<div class="info-line">' + escapeHtml(item.desc) + '</div>'
     + '<div class="info-coord">Lat ' + item.lat.toFixed(2) + '° · Lon ' + item.lon.toFixed(2) + '°</div>';
-}
-
-/* ===== API IPGEOLOCATION ===== */
-var moonPhaseIt = {
-  'New Moon':'Luna Nuova','Waxing Crescent':'Falce Crescente','First Quarter':'Primo Quarto',
-  'Waxing Gibbous':'Gibbosa Crescente','Full Moon':'Luna Piena','Waning Gibbous':'Gibbosa Calante',
-  'Last Quarter':'Ultimo Quarto','Waning Crescent':'Falce Calante'
-};
-function fetchMoonApiData(){
-  var statusEl = document.getElementById('apiMoonStatus');
-  if(!MOON_API_KEY){
-    if(statusEl){
-      statusEl.textContent = 'Nessuna API key configurata. Tocca "Configura API Luna" in fondo.';
-      statusEl.classList.add('warn');
-    }
-    return;
-  }
-  var url = 'https://api.ipgeolocation.io/v3/astronomy'
-    + '?apiKey=' + encodeURIComponent(MOON_API_KEY)
-    + '&lat=' + loc.lat.toFixed(4)
-    + '&long=' + loc.lon.toFixed(4);
-  fetch(url).then(function(r){return r.json();}).then(function(data){
-    try{
-      var astro = data.astronomy || data;
-      var phaseEn = astro.moon_phase || '';
-      var phaseIt = moonPhaseIt[phaseEn] || phaseEn || '--';
-      var setTxt = function(id, txt){var el = document.getElementById(id); if(el) el.textContent = txt;};
-      setTxt('apiMoonPhase', phaseIt);
-      setTxt('apiMoonIllum', (astro.moon_illumination_percentage !== undefined ? Math.round(astro.moon_illumination_percentage) + '%' : '--'));
-      setTxt('apiMoonAz', (astro.moon_azimuth !== undefined ? Math.round(astro.moon_azimuth) + '°' : '--'));
-      setTxt('apiMoonAlt', (astro.moon_altitude !== undefined ? Math.round(astro.moon_altitude) + '°' : '--'));
-      setTxt('apiMoonDist', (astro.moon_distance !== undefined ? Math.round(astro.moon_distance).toLocaleString('it-IT') + ' km' : '--'));
-      setTxt('apiMoonRiseSet', ((astro.moonrise || '--') + ' / ' + (astro.moonset || '--')));
-      if(statusEl){
-        statusEl.textContent = 'Dati sincronizzati con il tuo GPS';
-        statusEl.classList.remove('warn');
-      }
-    }catch(e){ console.log('[MoonAPI] parse', e); }
-  }).catch(function(){
-    if(statusEl){
-      statusEl.textContent = 'Errore API (key non valida o quota esaurita).';
-      statusEl.classList.add('warn');
-    }
-  });
 }
 
 /* ===== UI AGGIORNAMENTI ===== */
@@ -2392,7 +2270,6 @@ function geocodeCity(query){
         weatherLoaded=false;
         updateAstro();
         fetchWeather();
-        fetchMoonApiData();
       });
     });
   }).catch(function(){
@@ -2410,7 +2287,7 @@ function acquireGps(){
     fetchMagneticDeclination();
     btn.textContent="GPS Attivo";
     weatherLoaded=false;
-    updateAstro();fetchWeather();fetchMoonApiData();
+    updateAstro();fetchWeather();
   },function(){btn.textContent="GPS Negato";},{timeout:6000});
 }
 var permState={geo:'wait',notif:'wait',cam:'wait'};
@@ -2483,7 +2360,7 @@ function runOnboarding(){
       safeSet('astroalert_onboarded','1');
       document.getElementById('permOverlay').style.display='none';
       weatherLoaded=false;
-      updateAstro();fetchWeather();fetchKp();fetchMagneticDeclination();fetchMoonApiData();
+      updateAstro();fetchWeather();fetchKp();fetchMagneticDeclination();
       toast('Permessi configurati!',2500);
     });
   });
@@ -2530,41 +2407,12 @@ function showCdnError(){
   if(p)p.innerHTML='<div class="note err"><b>Errore critico:</b> la libreria Astronomy Engine non è stata caricata. Verifica la connessione e ricarica.</div>';
   var n=document.getElementById('nightTargets');if(n)n.innerHTML='<div class="section-note">In attesa del motore astronomico...</div>';
 }
-function initApiKeyModal(){
-  var modal = document.getElementById('apiKeyModal');
-  var btnOpen = document.getElementById('btnApiKey');
-  var btnSave = document.getElementById('apiKeySave');
-  var btnCancel = document.getElementById('apiKeyCancel');
-  var input = document.getElementById('apiKeyInput');
-  if(!modal || !btnOpen) return;
-  btnOpen.addEventListener('click', function(){
-    input.value = MOON_API_KEY;
-    modal.classList.add('show');
-  });
-  btnSave.addEventListener('click', function(){
-    var k = input.value.trim();
-    if(k){
-      safeSet('astroalert_ipgeo_key', k);
-      MOON_API_KEY = k;
-      toast('API key salvata!', 2200);
-    }
-    modal.classList.remove('show');
-    fetchMoonApiData();
-  });
-  btnCancel.addEventListener('click', function(){
-    modal.classList.remove('show');
-  });
-  modal.addEventListener('click', function(e){
-    if(e.target === modal) modal.classList.remove('show');
-  });
-}
 
 function init(){
   checkSecureContext();
   updateLocLabel();
   updateOnlineDot();
   fetchMagneticDeclination();
-  initApiKeyModal();
 
   try {
     initMoonTabs();
